@@ -1,0 +1,1467 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEW ERA OF WAR</title>
+<style>
+:root{
+  --primary:#a3e635;
+  --primary-dark:#65a30d;
+  --bg:#0a0f1a;
+  --panel:#141c12;
+  --panel2:#111827;
+  --text:#f5f7f2;
+  --muted:#9aa39a;
+  --gold:rgba(214,168,79,.35);
+  --ally:#3b82f6;
+  --enemy:#ef4444;
+  --radius:8px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.06;background-image:radial-gradient(#fff .6px,transparent .6px);background-size:5px 5px;z-index:50;}
+.heading{letter-spacing:.06em;text-transform:uppercase;font-weight:900;}
+.muted{color:var(--muted);}
+.grid-bg{background-image:linear-gradient(rgba(214,168,79,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(214,168,79,.06) 1px,transparent 1px);background-size:32px 32px;}
+.panel{background:linear-gradient(145deg,rgba(33,42,31,.96),rgba(20,25,20,.96));border:1px solid var(--gold);border-radius:var(--radius);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem 1.4rem;border-radius:var(--radius);text-transform:uppercase;letter-spacing:.1em;font-weight:800;font-size:.78rem;border:none;cursor:pointer;transition:.15s;font-family:inherit;}
+.btn-primary{background:var(--primary);color:#04140a;}
+.btn-primary:hover{filter:brightness(1.15);transform:translateY(-2px);}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-ghost{border:1px solid var(--gold);color:var(--primary);background:transparent;}
+.btn-ghost:hover{background:rgba(214,168,79,.12);}
+.screen{display:none;min-height:100%;width:100%;}
+.screen.active{display:block;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px;}
+header.top{border-bottom:1px solid var(--gold);}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;}
+.logo{font-weight:900;letter-spacing:.06em;color:var(--primary);text-transform:uppercase;cursor:pointer;background:none;border:none;font-size:1.1rem;font-family:inherit;}
+.logo span{color:var(--text);}
+.step{color:var(--primary);font-size:.72rem;letter-spacing:.25em;margin-bottom:10px;text-transform:uppercase;}
+.scrollpane{height:100vh;overflow-y:auto;}
+.card{padding:20px;cursor:pointer;transition:.15s;}
+.card:hover{border-color:var(--primary);transform:translateY(-2px);}
+.card h2{margin:14px 0 4px;font-size:1.25rem;}
+.statrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:.72rem;}
+.statrow span{background:rgba(0,0,0,.3);padding:5px 9px;border-radius:5px;}
+.grid2{display:grid;gap:16px;}
+@media(min-width:640px){.grid2{grid-template-columns:1fr 1fr;}}
+@media(min-width:900px){.grid3{grid-template-columns:repeat(3,1fr);}}
+.grid3{display:grid;gap:16px;}
+.grid-cls{display:grid;gap:14px;grid-template-columns:1fr;}
+@media(min-width:640px){.grid-cls{grid-template-columns:1fr 1fr;}}
+@media(min-width:980px){.grid-cls{grid-template-columns:repeat(3,1fr);}}
+
+/* ---- BATTLE LAYOUT ---- */
+#screen-battle{position:fixed;inset:0;background:#000;}
+#battleGrid{display:grid;grid-template-columns:1fr 300px;gap:0;height:100vh;}
+#gameCanvasWrap{position:relative;overflow:hidden;background:#0e1410;}
+#gameCanvas{display:block;width:100%;height:100%;}
+#hud{background:var(--panel2);border-left:1px solid var(--gold);padding:16px;overflow-y:auto;}
+#topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 16px;background:linear-gradient(180deg,rgba(0,0,0,.65),transparent);font-size:.72rem;letter-spacing:.1em;color:var(--primary);pointer-events:none;z-index:5;}
+#radarNotice{position:absolute;top:44px;left:50%;transform:translateX(-50%);background:rgba(163,230,53,.15);border:1px solid var(--primary);color:var(--primary);padding:5px 14px;border-radius:20px;font-size:.72rem;letter-spacing:.15em;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5;}
+#toast{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(10,15,10,.85);border:1px solid var(--gold);padding:8px 18px;border-radius:6px;font-size:.78rem;opacity:0;transition:opacity .4s;pointer-events:none;max-width:80%;text-align:center;z-index:5;}
+#logfeed{position:absolute;bottom:16px;right:16px;width:270px;font-size:.68rem;line-height:1.5;color:#d5dccc;pointer-events:none;text-shadow:0 1px 3px #000;z-index:5;}
+#logfeed div{opacity:.9;}
+.hpbar{height:9px;background:#000;border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,.1);}
+.hpbar>i{display:block;height:100%;background:var(--primary);transition:width .15s;}
+.ammobar{font-variant-numeric:tabular-nums;}
+.hud-stat{border-left:2px solid var(--primary);padding-left:8px;}
+.hud-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.68rem;}
+#minimapWrap{position:relative;}
+#minimap{background:#080c08;border:1px solid var(--gold);border-radius:4px;display:block;width:100%;}
+.cooldown-pill{display:flex;justify-content:space-between;font-size:.65rem;background:rgba(0,0,0,.35);padding:6px 8px;border-radius:5px;margin-top:6px;}
+.wchip{font-size:.62rem;padding:4px 8px;border-radius:5px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);color:var(--muted);cursor:pointer;}
+.wchip.active{background:rgba(163,230,53,.18);border-color:var(--primary);color:var(--primary);font-weight:700;}
+.wchip.empty{opacity:.4;}
+.keyhint{font-size:.6rem;color:var(--muted);letter-spacing:.05em;margin-top:14px;line-height:1.6;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;}
+.progresswrap{margin-top:10px;}
+.progresswrap .lbl{display:flex;justify-content:space-between;font-size:.62rem;margin-bottom:3px;}
+.pbar{height:6px;background:#000;border-radius:4px;overflow:hidden;}
+.pbar>i{display:block;height:100%;}
+#endScreen h1{font-size:3rem;}
+#endStats{margin-top:24px;}
+</style>
+</head>
+<body>
+
+<!-- =============== MENU =============== -->
+<section id="screen-menu" class="screen active scrollpane grid-bg">
+  <header class="top"><div class="wrap"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button></div></header>
+  <main class="wrap" style="padding:70px 22px;">
+    <div class="grid2" style="align-items:center;gap:50px;">
+      <section>
+        <div class="step"><span style="display:inline-block;width:34px;height:1px;background:var(--primary);vertical-align:middle;margin-right:8px;"></span>ТАКТИЧНА ОПЕРАЦІЯ // 01</div>
+        <h1 class="heading" style="font-size:4.4rem;line-height:.86;margin:0;">New<br><span style="color:var(--primary);">Era</span><br>of War</h1>
+        <p class="muted" style="max-width:480px;margin-top:26px;font-size:1.05rem;line-height:1.6;">Тактичний командний шутер зверху. Обери спеціаліста, керуй загоном з 10 бійців та захопи центральну точку раніше за ворога.</p>
+        <div style="margin-top:34px;display:flex;flex-wrap:wrap;gap:14px;">
+          <button class="btn btn-primary" onclick="goto_('map')">Почати гру →</button>
+          <button class="btn btn-ghost" onclick="goto_('details')">Деталі гри</button>
+          <button class="btn btn-ghost" onclick="goto_('settings')">Налаштування</button>
+        </div>
+      </section>
+      <section class="panel" style="padding:28px;position:relative;">
+        <div style="position:absolute;top:0;right:0;padding:8px 12px;font-size:9px;letter-spacing:.2em;color:var(--primary);border-left:1px solid var(--gold);border-bottom:1px solid var(--gold);">LIVE BRIEFING</div>
+        <div style="height:230px;border:1px solid var(--gold);position:relative;overflow:hidden;margin-bottom:22px;background:linear-gradient(135deg,#202a21,#131813);">
+          <div style="position:absolute;inset:0;opacity:.35;background:radial-gradient(ellipse at 30% 40%,#a38b4c,transparent 40%),radial-gradient(ellipse at 70% 65%,#78905b,transparent 45%);"></div>
+          <div style="position:absolute;left:20%;top:38%;width:10px;height:10px;background:var(--primary);border-radius:50%;box-shadow:0 0 25px 8px rgba(163,230,53,.35);"></div>
+          <div style="position:absolute;right:18%;bottom:26%;font-size:9px;letter-spacing:.2em;color:var(--primary);">SECTOR 04 // HOSTILE</div>
+          <div style="position:absolute;bottom:10px;left:10px;font-size:9px;letter-spacing:.2em;color:var(--muted);">TACTICAL FEED</div>
+        </div>
+        <div class="statrow" style="justify-content:space-between;">
+          <div class="hud-stat"><div style="font-size:1.3rem;font-weight:800;">10</div><div class="muted" style="font-size:.65rem;">БІЙЦІВ У КОМАНДІ</div></div>
+          <div class="hud-stat"><div style="font-size:1.3rem;font-weight:800;">35с</div><div class="muted" style="font-size:.65rem;">ОГЛЯД КАРТИ</div></div>
+          <div class="hud-stat"><div style="font-size:1.3rem;font-weight:800;">3:00</div><div class="muted" style="font-size:.65rem;">УТРИМАННЯ ТОЧКИ</div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</section>
+
+<!-- =============== MAP SELECT =============== -->
+<section id="screen-map" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button><span class="muted" style="font-size:.68rem;letter-spacing:.2em;">ОПЕРАЦІЯ / НАЛАШТУВАННЯ БОЮ</span></div></header>
+  <main class="wrap" style="padding:50px 22px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:30px;flex-wrap:wrap;gap:12px;">
+      <div><div class="step">КРОК 01 / 03</div><h1 class="heading" style="font-size:2.6rem;margin:0;">Оберіть театр бойових дій</h1></div>
+      <button class="btn btn-ghost" onclick="goto_('menu')">← Меню</button>
+    </div>
+    <div class="grid2" id="mapGrid"></div>
+  </main>
+</section>
+
+<!-- =============== SIZE SELECT =============== -->
+<section id="screen-size" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button></div></header>
+  <main class="wrap" style="padding:60px 22px;max-width:920px;">
+    <div class="step">КРОК 02 / 03</div>
+    <h1 class="heading" style="font-size:2.8rem;margin:0 0 8px;">Масштаб операції</h1>
+    <p class="muted" style="margin-bottom:30px;">Розмір карти визначає тривалість бою.</p>
+    <div class="grid3" id="sizeGrid"></div>
+  </main>
+</section>
+
+<!-- =============== CLASS SELECT =============== -->
+<section id="screen-class" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button></div></header>
+  <main class="wrap" style="padding:50px 22px 90px;">
+    <div class="step">КРОК 03 / 03</div>
+    <h1 class="heading" style="font-size:2.6rem;margin:0 0 20px;">Оберіть спеціаліста</h1>
+    <div class="grid-cls" id="classGrid"></div>
+  </main>
+</section>
+
+<!-- =============== DETAILS =============== -->
+<section id="screen-details" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button><button class="btn btn-ghost" onclick="goto_('menu')">← Меню</button></div></header>
+  <main class="wrap" style="padding:50px 22px 90px;">
+    <div class="step">ПОЛЬОВИЙ ДОВІДНИК</div>
+    <h1 class="heading" style="font-size:2.8rem;margin:0 0 26px;">Деталі гри</h1>
+    <div id="detailsBody" style="display:grid;gap:16px;max-width:820px;"></div>
+  </main>
+</section>
+
+<!-- =============== SETTINGS =============== -->
+<section id="screen-settings" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button><button class="btn btn-ghost" onclick="goto_('menu')">← Меню</button></div></header>
+  <main class="wrap" style="padding:60px 22px;max-width:640px;">
+    <div class="step">СИСТЕМНІ ПАРАМЕТРИ</div>
+    <h1 class="heading" style="font-size:2.6rem;margin:0 0 26px;">Налаштування</h1>
+    <section class="panel" style="padding:0;">
+      <label style="padding:20px;display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid rgba(255,255,255,.08);align-items:center;">
+        <span><b>Звукові ефекти</b><small class="muted" style="display:block;margin-top:3px;">Постріли, вибухи, сигнали</small></span>
+        <input type="checkbox" id="optSfx" checked style="width:20px;height:20px;accent-color:var(--primary);">
+      </label>
+      <label style="padding:20px;display:flex;justify-content:space-between;gap:20px;align-items:center;">
+        <span><b>Тактичні підказки</b><small class="muted" style="display:block;margin-top:3px;">Показувати підказки керування під час бою</small></span>
+        <input type="checkbox" id="optHints" checked style="width:20px;height:20px;accent-color:var(--primary);">
+      </label>
+    </section>
+  </main>
+</section>
+
+<!-- =============== BATTLE =============== -->
+<section id="screen-battle" class="screen">
+  <div id="battleGrid">
+    <div id="gameCanvasWrap">
+      <canvas id="gameCanvas"></canvas>
+      <div id="topbar"><span id="opLabel">ОПЕРАЦІЯ: FRONTLINE</span><span id="matchClock">00:00</span></div>
+      <div id="radarNotice">📡 РОЗВІДКА: ПОЗИЦІЇ ВОРОГІВ ВИЯВЛЕНО</div>
+      <div id="toast"></div>
+      <div id="logfeed"></div>
+    </div>
+    <aside id="hud">
+      <div class="step" style="margin-bottom:2px;">СТАН БІЙЦЯ</div>
+      <h2 class="heading" id="hudClassName" style="font-size:1.4rem;margin:2px 0 10px;">—</h2>
+      <div class="hpbar"><i id="hpFill" style="width:100%;"></i></div>
+      <div style="display:flex;justify-content:space-between;font-size:.68rem;margin-top:5px;"><span>ЗДОРОВ'Я</span><span id="hpText">0/0</span></div>
+
+      <div class="hud-grid" style="margin-top:16px;">
+        <div class="hud-stat"><b id="statSpeed">0</b><br><span class="muted">ШВИДКІСТЬ</span></div>
+        <div class="hud-stat"><b id="statStealth">0</b><br><span class="muted">МАСКУВАННЯ</span></div>
+        <div class="hud-stat"><b id="statArmor">0</b><br><span class="muted">БРОНЯ</span></div>
+        <div class="hud-stat"><b id="statAmmo">0/0</b><br><span class="muted">БОЄЗАПАС</span></div>
+      </div>
+
+      <div class="progresswrap">
+        <div class="lbl"><span>ЗБРОЯ (колесо миші / 1-4)</span><span id="weaponName">—</span></div>
+        <div id="weaponWheel" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;"></div>
+      </div>
+
+      <div class="progresswrap">
+        <div class="lbl"><span style="color:var(--ally);">СОЮЗНІ ВІЙСЬКА</span><span id="allyCount">10/10</span></div>
+        <div class="pbar"><i id="allyBar" style="background:var(--ally);width:100%;"></i></div>
+      </div>
+      <div class="progresswrap">
+        <div class="lbl"><span style="color:var(--enemy);">ВОРОЖІ ВІЙСЬКА</span><span id="enemyCount">10/10</span></div>
+        <div class="pbar"><i id="enemyBar" style="background:var(--enemy);width:100%;"></i></div>
+      </div>
+      <div class="progresswrap">
+        <div class="lbl"><span>ЦЕНТРАЛЬНА ТОЧКА</span><span id="captureLabel">—</span></div>
+        <div class="pbar"><i id="captureBar" style="background:var(--primary);width:0%;"></i></div>
+      </div>
+
+      <div id="cooldownsBox"></div>
+
+      <div id="minimapWrap" style="margin-top:16px;">
+        <canvas id="minimap" width="256" height="256"></canvas>
+      </div>
+
+      <div class="keyhint">
+        WASD — рух · МИША — приціл · ЛКМ/Пробіл — вогонь · R — перезарядка<br>
+        Колесо миші / 1-4 — зброя · E — здібність · Q — спорядження · Esc — вихід
+      </div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:14px;" onclick="endMission()">Завершити місію</button>
+    </aside>
+  </div>
+</section>
+
+<!-- =============== END SCREEN =============== -->
+<section id="screen-end" class="screen grid-bg" style="min-height:100vh;">
+  <main class="wrap" style="padding:90px 22px;text-align:center;" id="endScreen">
+    <div class="step" style="justify-content:center;display:flex;">РЕЗУЛЬТАТ ОПЕРАЦІЇ</div>
+    <h1 class="heading" id="endTitle">—</h1>
+    <p class="muted" id="endSub" style="font-size:1.05rem;"></p>
+    <div id="endStats" class="panel" style="max-width:520px;margin:24px auto 0;padding:24px;text-align:left;"></div>
+    <div style="margin-top:30px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="goto_('map')">Нова операція</button>
+      <button class="btn btn-ghost" onclick="goto_('menu')">Головне меню</button>
+    </div>
+  </main>
+</section>
+
+<script>
+"use strict";
+/* =====================================================================
+   NEW ERA OF WAR — браузерна тактична гра (Canvas, без зовнішніх файлів)
+   ===================================================================== */
+
+/* ---------- НАВІГАЦІЯ МІЖ ЕКРАНАМИ ---------- */
+function goto_(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  if(name==='battle'){ resizeCanvas(); }
+  if(RUN.active && name!=='battle'){ stopMatch(false); }
+}
+
+/* ---------- ДАНІ: КАРТИ ---------- */
+const RSCALE = 3; // масштаб дальностей зі специфікації під розмір карти
+const SPD = 14;   // масштаб швидкості (юніти світу за секунду на 1 "px/с" зі специфікації)
+
+const MAPS = {
+  snow:  {name:'Сніги',           icon:'❄', speedMod:-3, stealthMod:+2, armorMod:0, rangeMod:1.0, grad:['#26313a','#131a1f'], swamp:false, desc:'Швидкість −3 · Маскування +2'},
+  desert:{name:'Пустиня',         icon:'☀', speedMod:0,  stealthMod:-1, armorMod:0, rangeMod:1.5, grad:['#5b4526','#1a140b'], swamp:false, desc:'Маскування −1 · Дальність +50%'},
+  city:  {name:'Покинуте місто',  icon:'▦', speedMod:-1, stealthMod:0,  armorMod:3, rangeMod:1.0, grad:['#3a3a35','#131311'], swamp:true,  desc:'Броня +3 · Швидкість −1'},
+  field: {name:'Поле',            icon:'⌁', speedMod:0,  stealthMod:-4, armorMod:0, rangeMod:2.0, grad:['#3a4a28','#131a10'], swamp:true,  desc:'Маскування −4 · Дальність +100%'}
+};
+const SIZES = [
+  {size:1000, time:600,  label:'1000 × 1000', desc:"Ближній бій · швидке зіткнення"},
+  {size:2000, time:900,  label:'2000 × 2000', desc:'Збалансований фронт · рекомендовано'},
+  {size:3000, time:1200, label:'3000 × 3000', desc:'Велика операція · розвідка вирішує'}
+];
+
+/* ---------- ДАНІ: ЗБРОЯ ---------- */
+const WEAPONS = {
+  // minR/maxR — точно дальність зі специфікації × RSCALE. Ефективна дальність у бою
+  // додатково множиться на модифікатор карти "дальність" (map.rangeMod) — див. wRange().
+  sniper_rifle:{name:'Снайперська гвинтівка',minR:100*RSCALE,maxR:300*RSCALE,dmg:100,mag:5,maxAmmo:30,shotCd:1.0,reload:5.0,bSpeed:1400,color:'#facc15'},
+  pistol:{name:'Пістолет',minR:0*RSCALE,maxR:30*RSCALE,dmg:24,mag:7,maxAmmo:35,shotCd:0.28,reload:2.0,bSpeed:1100,color:'#e5e7eb'},
+  shotgun:{name:'Дробовик',minR:30*RSCALE,maxR:50*RSCALE,dmgMax:45,dmgMin:15,mag:7,maxAmmo:25,shotCd:0.85,reload:4.0,bSpeed:1100,pellets:5,spreadDeg:16,color:'#f97316'},
+  heavy_mg:{name:'Важкий кулемет',minR:45*RSCALE,maxR:100*RSCALE,dmg:22,mag:50,maxAmmo:300,shotCd:0.1,reload:5.0,bSpeed:1300,color:'#fb923c'},
+  sawed_off:{name:'Обріз',minR:10*RSCALE,maxR:30*RSCALE,dmgMax:35,dmgMin:5,mag:2,maxAmmo:10,shotCd:0.6,reload:3.0,bSpeed:1000,pellets:4,spreadDeg:24,color:'#eab308'},
+  assault_rifle:{name:'Автомат',minR:60*RSCALE,maxR:150*RSCALE,dmg:26,mag:35,maxAmmo:150,shotCd:0.13,reload:3.0,bSpeed:1300,color:'#38bdf8'},
+  grenade_launcher:{name:'Гранатомет',minR:50*RSCALE,maxR:200*RSCALE,dmg:70,mag:6,maxAmmo:30,shotCd:1.3,reload:6.0,bSpeed:820,splash:15*RSCALE,color:'#84cc16'},
+  mortar:{name:'Міномет',minR:100*RSCALE,maxR:550*RSCALE,dmg:120,mag:1,maxAmmo:20,shotCd:5.2,reload:0.0,bSpeed:620,splash:40*RSCALE,color:'#c084fc'},
+  knife:{name:'Ніж',minR:0,maxR:15*RSCALE,dmg:20,melee:true,shotCd:0.5,color:'#cbd5e1'},
+  bayonet:{name:'Штик-ніж',minR:5*RSCALE,maxR:20*RSCALE,dmg:25,melee:true,shotCd:0.5,color:'#cbd5e1'},
+  iron_knuckles:{name:'Рукавиці із залізними вставками',minR:0,maxR:10*RSCALE,dmg:25,melee:true,shotCd:0.42,color:'#cbd5e1'}
+};
+// Ефективна (з урахуванням карти) дальність зброї у світових одиницях
+function wRange(w){
+  const m = MAPS[RUN.mapKey].rangeMod;
+  return {minR:w.minR*m, maxR:w.maxR*m};
+}
+
+/* ---------- ДАНІ: ПРЕДМЕТИ ---------- */
+const ITEMS = {
+  mine:{name:'Міна',desc:'Ставить пастку. Вибухає під ворогом.',cd:8},
+  frag:{name:'Осколкова граната',desc:'75 урону у радіусі, кидок по курсору.',cd:12},
+  energy:{name:'Енергетик',desc:'+3 швидкості на 10с, +10 HP.',cd:14},
+  medkit:{name:'Аптечка',desc:'Відновлює 60 HP собі або союзнику поруч.',cd:15}
+};
+
+/* ---------- ДАНІ: ЗДІБНОСТІ ---------- */
+const ABILITIES = {
+  stealth_bonus:{name:'Маскування у нерухомості',desc:'+50% маскування, якщо стояти на місці.',passive:true},
+  fists:{name:'Рукопашний бій',desc:'Рукавиці — окрема зброя в колесі (перемикніть колесом миші).',passive:true},
+  terrain:{name:'Прохідність місцевості',desc:'Не сповільнюється у болотах/воді.',passive:true},
+  splash_stun:{name:'Приголомшення вибухом',desc:'Вибухи гранатомета оглушують ворогів.',passive:true},
+  heal_revive:{name:'Аура лікування / Порятунок',desc:'Лікує союзників поруч і рятує підбитих.',cd:30},
+  drone:{name:'Розвідувальний дрон',desc:'Нерухомість під час керування. Радіус виявлення 300 навколо дрона, керування в межах 50 від бійця.',cd:20},
+  mortar_reveal:{name:'Демаскування пострілом',desc:'Маскування падає після пострілу з міномета.',passive:true}
+};
+
+/* ---------- ДАНІ: КЛАСИ ---------- */
+const CLASSES = {
+  sniper:{name:'Снайпер',icon:'⌁',color:'#facc15',speed:6,hp:110,armor:2,stealth:70,weapons:['sniper_rifle','pistol','knife'],ability:'stealth_bonus',item:'mine',role:'Точність · маскування'},
+  assault:{name:'Штурмовик',icon:'▥',color:'#f97316',speed:2,hp:220,armor:10,stealth:20,weapons:['shotgun','heavy_mg','sawed_off','iron_knuckles'],ability:'fists',item:null,role:'Броня · прорив'},
+  ranger:{name:'Рейнджер',icon:'✦',color:'#38bdf8',speed:7,hp:140,armor:5,stealth:50,weapons:['assault_rifle','pistol','bayonet'],ability:'terrain',item:'frag',role:'Мобільність · універсальність'},
+  grenadier:{name:'Гранатометчик',icon:'✹',color:'#84cc16',speed:4,hp:160,armor:7,stealth:30,weapons:['grenade_launcher','pistol','knife'],ability:'splash_stun',item:'energy',role:'Площа · оглушення'},
+  medic:{name:'Медик',icon:'＋',color:'#4ade80',speed:9,hp:100,armor:3,stealth:60,weapons:['pistol','knife'],ability:'heal_revive',item:'medkit',role:'Лікування · підтримка'},
+  fpv:{name:'Розвідник (FPV)',icon:'◉',color:'#a78bfa',speed:6,hp:90,armor:1,stealth:10,weapons:['assault_rifle'],ability:'drone',item:'frag',role:'Дрон · тактична інформація'},
+  mortarman:{name:'Мінометник',icon:'◒',color:'#c084fc',speed:1,hp:60,armor:0,stealth:90,weapons:['mortar','assault_rifle','pistol'],ability:'mortar_reveal',item:'mine',role:'Дальня підтримка · облога'}
+};
+const CLASS_ORDER = ['sniper','assault','ranger','grenadier','medic','fpv','mortarman'];
+// Склад команди 10 бійців: 0-1 снайпер,0-1 fpv,0-1 медик,0-1 мінометник,0-2 гранатометчик,0-2 штурмовик,3-5 рейнджер
+const TEAM_COMPOSITION = ['sniper','fpv','medic','mortarman','grenadier','assault','ranger','ranger','ranger','ranger'];
+
+/* ---------- ЗАПОВНЕННЯ ЕКРАНІВ ВИБОРУ ---------- */
+const CHOICE = {map:null,size:null,cls:null};
+
+function buildMapGrid(){
+  const el=document.getElementById('mapGrid'); el.innerHTML='';
+  Object.keys(MAPS).forEach(key=>{
+    const m=MAPS[key];
+    const d=document.createElement('div');
+    d.className='panel card';
+    d.style.background=`linear-gradient(145deg, ${m.grad[0]}55, ${m.grad[1]}f0)`;
+    d.innerHTML=`<div style="font-size:2.2rem;">${m.icon}</div><h2 class="heading">${m.name}</h2><p class="muted" style="margin:4px 0 0;">${m.desc}</p>`;
+    d.onclick=()=>{CHOICE.map=key; goto_('size');};
+    el.appendChild(d);
+  });
+}
+function buildSizeGrid(){
+  const el=document.getElementById('sizeGrid'); el.innerHTML='';
+  SIZES.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='panel card';
+    d.innerHTML=`<div class="heading" style="font-size:2rem;color:var(--primary);">0${i+1}</div><h2 class="heading" style="margin-top:26px;">${s.label}</h2><p class="muted" style="margin-top:6px;">${s.desc}</p>`;
+    d.onclick=()=>{CHOICE.size=s; goto_('class');};
+    el.appendChild(d);
+  });
+}
+function buildClassGrid(){
+  const el=document.getElementById('classGrid'); el.innerHTML='';
+  CLASS_ORDER.forEach((key,i)=>{
+    const c=CLASSES[key];
+    const weaponNames = c.weapons.map(wk=>WEAPONS[wk].name).join(' · ');
+    const d=document.createElement('div');
+    d.className='panel card';
+    d.innerHTML=`<div style="display:flex;justify-content:space-between;"><span style="font-size:2.2rem;color:${c.color};">${c.icon}</span><span style="font-size:.68rem;color:var(--primary);">0${i+1}/07</span></div>
+      <h2 class="heading">${c.name}</h2><p class="muted" style="margin:2px 0 0;font-size:.85rem;">${c.role}</p>
+      <div class="statrow"><span>HP <b>${c.hp}</b></span><span>SPD <b>${c.speed}</b></span><span>ARM <b>${c.armor}</b></span><span>STL <b>${c.stealth}</b></span></div>
+      <div class="muted" style="font-size:.68rem;margin-top:8px;">Зброя (колесо миші): ${weaponNames}</div>`;
+    d.onclick=()=>{CHOICE.cls=key; startMatch();};
+    el.appendChild(d);
+  });
+}
+function buildDetails(){
+  const el=document.getElementById('detailsBody');
+  el.innerHTML=`
+  <section class="panel" style="padding:22px;">
+    <h2 class="heading" style="color:var(--primary);margin-top:0;">Умови перемоги</h2>
+    <p class="muted">Захопіть центральну точку та утримуйте її 3 хвилини (безперервно, без опору ворога), захопіть ворожу базу, або знищіть весь склад противника. Якщо час бою вийде — перемагає команда, яка утримує точку, або з більшою кількістю бійців.</p>
+  </section>
+  <section class="panel" style="padding:22px;">
+    <h2 class="heading" style="color:var(--primary);margin-top:0;">Карти та модифікатори</h2>
+    <div class="grid2">${Object.values(MAPS).map(m=>`<div style="border:1px solid rgba(255,255,255,.1);padding:12px;"><b>${m.icon} ${m.name}</b><p class="muted" style="margin:6px 0 0;">${m.desc}</p></div>`).join('')}</div>
+  </section>
+  <section class="panel" style="padding:22px;">
+    <h2 class="heading" style="color:var(--primary);margin-top:0;">Персонажі</h2>
+    <p class="muted">7 спеціалістів, команда з 10 бійців: до 1 снайпера, до 1 розвідника, до 1 медика, до 1 мінометника, до 2 гранатометчиків, до 2 штурмовиків та 3-5 рейнджерів.</p>
+  </section>
+  <section class="panel" style="padding:22px;">
+    <h2 class="heading" style="color:var(--primary);margin-top:0;">Керування</h2>
+    <p class="muted">WASD — рух, миша — приціл, ЛКМ/Пробіл — вогонь, колесо миші або 1-4 — зміна зброї, R — перезарядка, E — здібність, Q — спорядження.</p>
+  </section>`;
+}
+buildMapGrid(); buildSizeGrid(); buildClassGrid(); buildDetails();
+
+/* =====================================================================
+   ІГРОВИЙ ДВИЖОК
+   ===================================================================== */
+let RUN = {active:false};
+let canvas, ctx, mini, mctx;
+let camX=0, camY=0, CW=900, CH=560;
+let keys={}, mouse={x:0,y:0,down:false};
+let logLines = [];
+
+window.addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  if(!RUN.active) return;
+  if(e.code==='KeyR') tryReload(RUN.player);
+  if(e.code==='KeyE') tryAbility(RUN.player);
+  if(e.code==='KeyQ') tryItem(RUN.player);
+  if(e.code==='Digit1') switchWeaponTo(RUN.player,0);
+  if(e.code==='Digit2') switchWeaponTo(RUN.player,1);
+  if(e.code==='Digit3') switchWeaponTo(RUN.player,2);
+  if(e.code==='Digit4') switchWeaponTo(RUN.player,3);
+  if(e.code==='Space') e.preventDefault();
+  if(e.code==='Escape') endMission();
+});
+window.addEventListener('keyup',e=>{keys[e.code]=false;});
+
+function resizeCanvas(){
+  canvas = document.getElementById('gameCanvas');
+  const wrap = document.getElementById('gameCanvasWrap');
+  canvas.width = wrap.clientWidth; canvas.height = wrap.clientHeight;
+  CW=canvas.width; CH=canvas.height;
+  ctx = canvas.getContext('2d');
+  canvas.onmousemove = e=>{
+    const r=canvas.getBoundingClientRect();
+    mouse.x = e.clientX-r.left; mouse.y = e.clientY-r.top;
+  };
+  canvas.onmousedown = ()=>{mouse.down=true;};
+  window.addEventListener('mouseup',()=>{mouse.down=false;});
+  canvas.onwheel = e=>{
+    e.preventDefault();
+    if(RUN.active && RUN.player) switchWeapon(RUN.player, e.deltaY>0?1:-1);
+  };
+}
+window.addEventListener('resize',()=>{ if(RUN.active) resizeCanvas(); });
+
+/* ---------- ЗВУК (проста генерація через WebAudio, без файлів) ---------- */
+let actx=null;
+function beep(freq,dur,type,vol){
+  if(!document.getElementById('optSfx').checked) return;
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type||'square'; o.frequency.value=freq;
+    g.gain.value=(vol||0.05);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+dur);
+    o.stop(actx.currentTime+dur);
+  }catch(e){}
+}
+const SND = {
+  shot:()=>beep(220,0.08,'square',0.04),
+  sniperShot:()=>beep(120,0.25,'sawtooth',0.06),
+  explosion:()=>beep(60,0.35,'triangle',0.09),
+  hit:()=>beep(500,0.05,'square',0.03),
+  heal:()=>beep(880,0.12,'sine',0.03),
+  capture:()=>beep(660,0.4,'sine',0.05),
+  down:()=>beep(90,0.4,'sawtooth',0.06)
+};
+
+/* ---------- ДОПОМІЖНІ ФУНКЦІЇ ---------- */
+function rand(a,b){return a+Math.random()*(b-a);}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function seededRng(seed){ let s=seed%2147483647; if(s<=0)s+=2147483646;
+  return function(){ s=(s*16807)%2147483647; return (s-1)/2147483646; }; }
+
+/* ---------- СУТНІСТЬ ---------- */
+let ENTID=0;
+function makeEntity(team,clsKey,x,y,isPlayer){
+  const c = CLASSES[clsKey];
+  const map = MAPS[RUN.mapKey];
+  const spd = Math.max(0.6,(c.speed+map.speedMod)) * SPD;
+  const armor = c.armor + (map.armorMod||0);
+  const weapons = c.weapons.slice();
+  const ammoState = {};
+  weapons.forEach(wk=>{
+    const w = WEAPONS[wk];
+    ammoState[wk] = w.melee
+      ? {mag:1,reserve:0,reloading:false,reloadT:0,shotT:0}
+      : {mag:w.mag,reserve:w.maxAmmo,reloading:false,reloadT:0,shotT:0};
+  });
+  return {
+    id:ENTID++, team, cls:clsKey, isPlayer:!!isPlayer,
+    x,y, angle:0, radius:15,
+    hp:c.hp, maxHp:c.hp, armor, baseStealth:c.stealth, mapStealthMod:map.stealthMod,
+    speed:spd, weapons, weaponIdx:0, weaponKey:weapons[0], ammoState, standStill:0,
+    state:'patrol', downed:false, downedAt:0, dead:false,
+    abilityCd:0, itemCd:0, itemActiveT:0, speedBuffT:0,
+    patrolTarget:null, kills:0,
+    droneReveal:0, droneState:'idle', droneTimer:0, droneX:0, droneY:0, droneHoldTimer:0
+  };
+}
+function switchWeapon(e, dir){
+  if(!e || !e.weapons || e.weapons.length<2 || e.downed || e.dead) return;
+  e.weaponIdx = (e.weaponIdx + dir + e.weapons.length) % e.weapons.length;
+  e.weaponKey = e.weapons[e.weaponIdx];
+  if(e.isPlayer) toast('Зброя: '+WEAPONS[e.weaponKey].name);
+}
+function switchWeaponTo(e, idx){
+  if(!e || !e.weapons || idx>=e.weapons.length || e.downed || e.dead) return;
+  e.weaponIdx = idx; e.weaponKey = e.weapons[idx];
+  if(e.isPlayer) toast('Зброя: '+WEAPONS[e.weaponKey].name);
+}
+const DRONE_RADIUS = 600*RSCALE;
+const DRONE_LEASH = 50*RSCALE;
+const DRONE_SPEED = 5*SPD;
+function underDroneReveal(e){
+  return RUN.entities.some(o=>o.team!==e.team && o.droneState==='active' && Math.hypot(o.droneX-e.x,o.droneY-e.y)<DRONE_RADIUS);
+}
+function effectiveStealth(e){
+  let s = e.baseStealth + e.mapStealthMod;
+  if(CLASSES[e.cls].ability==='stealth_bonus' && e.standStill>1.0) s*=1.5;
+  if(underDroneReveal(e)) s*=0.8;
+  return clamp(s,0,140);
+}
+function canSee(a,b){
+  const d = dist(a,b);
+  const base = 780*MAPS[RUN.mapKey].rangeMod;
+  const eff = base - effectiveStealth(b)*4.2;
+  if(d>140 && d > Math.max(120, eff)) return false;
+  return hasLineOfSight(a,b);
+}
+
+/* ---------- УКРИТТЯ / КОЛІЗІЇ ---------- */
+function collideCircleAt(x,y,rad,c){
+  if(c.shape==='rect'){
+    const hw=c.w/2, hh=c.h/2;
+    const cx=clamp(x,c.x-hw,c.x+hw), cy=clamp(y,c.y-hh,c.y+hh);
+    return Math.hypot(x-cx,y-cy) < rad;
+  }
+  return Math.hypot(x-c.x,y-c.y) < rad+c.r;
+}
+function blockedAt(x,y){
+  if(!RUN.covers) return false;
+  for(const c of RUN.covers){ if(c.blocksLOS && collideCircleAt(x,y,3,c)) return true; }
+  return false;
+}
+function segmentBlocked(a,b){
+  if(!RUN.covers || !RUN.covers.length) return false;
+  const d = dist(a,b);
+  const steps = Math.max(2, Math.floor(d/26));
+  for(let i=1;i<steps;i++){
+    const t=i/steps;
+    const x=a.x+(b.x-a.x)*t, y=a.y+(b.y-a.y)*t;
+    if(blockedAt(x,y)) return true;
+  }
+  return false;
+}
+function hasLineOfSight(a,b){
+  if(dist(a,b)<70) return true; // впритул завжди видно
+  return !segmentBlocked(a,b);
+}
+function nearestCover(x,y,maxDist){
+  if(!RUN.covers) return null;
+  let best=null,bd=maxDist;
+  RUN.covers.forEach(c=>{
+    const d=Math.hypot(x-c.x,y-c.y);
+    if(d<bd){ bd=d; best=c; }
+  });
+  return best;
+}
+// рух із зіткненням об суцільні перешкоди (окремо по осях X/Y — дає ковзання вздовж стін)
+function moveEntity(e, nx, ny){
+  nx = clamp(nx,20,RUN.mapSize-20); ny = clamp(ny,20,RUN.mapSize-20);
+  let blockedX=false, blockedY=false;
+  if(RUN.covers){
+    for(const c of RUN.covers){
+      if(!c.solid) continue;
+      if(collideCircleAt(nx, e.y, e.radius, c)) blockedX=true;
+      if(collideCircleAt(e.x, ny, e.radius, c)) blockedY=true;
+    }
+  }
+  if(!blockedX) e.x = nx;
+  if(!blockedY) e.y = ny;
+}
+
+/* ---------- ГЕНЕРАЦІЯ РЕЛЬЄФУ КАРТИ ---------- */
+function buildMapLayout(mapKey, ms, seed, allyBase, enemyBase, cap, capR){
+  const rng = seededRng(seed);
+  const covers=[], swamps=[];
+  function clearOfBases(x,y,pad){
+    return Math.hypot(x-allyBase.x,y-allyBase.y)>150+pad && Math.hypot(x-enemyBase.x,y-enemyBase.y)>150+pad;
+  }
+  function clearOfCap(x,y,pad){ return Math.hypot(x-cap.x,y-cap.y) > capR+pad; }
+
+  if(mapKey==='city'){
+    // квартали покинутого міста: прямокутні будівлі вздовж вулиць
+    const cell = ms/9;
+    for(let gx=0;gx<9;gx++) for(let gy=0;gy<9;gy++){
+      if(rng()>0.52) continue;
+      const cx = cell*gx+cell*0.5+rand(-cell*0.1,cell*0.1);
+      const cy = cell*gy+cell*0.5+rand(-cell*0.1,cell*0.1);
+      if(!clearOfBases(cx,cy,50) || !clearOfCap(cx,cy,60)) continue;
+      const w = cell*rand(0.4,0.62), h = cell*rand(0.4,0.62);
+      covers.push({x:cx,y:cy,w,h,shape:'rect',solid:true,blocksLOS:true,fill:'#3a3a35',stroke:'#54544c'});
+    }
+  } else if(mapKey==='desert'){
+    // скельні виходи та піщані дюни, розкидані рідше — відкриті прострільні коридори
+    const n = Math.max(8,Math.floor(ms/300));
+    for(let i=0;i<n;i++){
+      const x=rng()*ms, y=rng()*ms;
+      if(!clearOfBases(x,y,40) || !clearOfCap(x,y,50)) continue;
+      const clusters = 1+Math.floor(rng()*3);
+      for(let k=0;k<clusters;k++){
+        covers.push({x:x+rand(-40,40),y:y+rand(-40,40),r:rand(22,48),shape:'circle',solid:true,blocksLOS:true,fill:'#8a5a2e',stroke:'#c2793e'});
+      }
+    }
+    for(let i=0;i<Math.max(2,Math.floor(ms/900));i++){
+      swamps.push({x:rng()*ms,y:rng()*ms,r:rand(140,240),fill:'rgba(230,190,120,0.18)'});
+    }
+  } else if(mapKey==='field'){
+    // відкрите поле: рідкі кущі/дерева, кілька заболочених ділянок
+    const n = Math.max(10,Math.floor(ms/260));
+    for(let i=0;i<n;i++){
+      const x=rng()*ms, y=rng()*ms;
+      if(!clearOfBases(x,y,30) || !clearOfCap(x,y,40)) continue;
+      covers.push({x,y,r:rand(13,24),shape:'circle',solid:true,blocksLOS:true,fill:'#3f5f28',stroke:'#5c8a3a'});
+    }
+    for(let i=0;i<Math.max(2,Math.floor(ms/950));i++){
+      swamps.push({x:rng()*ms,y:rng()*ms,r:rand(90,170),fill:'rgba(90,110,60,0.28)'});
+    }
+  } else if(mapKey==='snow'){
+    // засніжена місцевість: льодові валуни, рідкісні ялини, замерзле озеро
+    const n = Math.max(9,Math.floor(ms/280));
+    for(let i=0;i<n;i++){
+      const x=rng()*ms, y=rng()*ms;
+      if(!clearOfBases(x,y,40) || !clearOfCap(x,y,50)) continue;
+      covers.push({x,y,r:rand(18,36),shape:'circle',solid:true,blocksLOS:true,fill:'#324352',stroke:'#5b7a8c'});
+    }
+    const lakeCount = Math.max(1,Math.floor(ms/1400));
+    for(let i=0;i<lakeCount;i++){
+      swamps.push({x:ms*rand(0.3,0.7),y:ms*rand(0.3,0.7),r:ms*rand(0.09,0.14),fill:'rgba(180,220,245,0.22)'});
+    }
+  }
+  return {covers, swamps};
+}
+
+/* ---------- СТАРТ МАТЧУ ---------- */
+function startMatch(){
+  RUN = {
+    active:true, mapKey:CHOICE.map, sizeInfo:CHOICE.size, playerCls:CHOICE.cls,
+    mapSize:CHOICE.size.size, timeLeft:CHOICE.size.time, radarTimer:0, radarActive:0,
+    entities:[], bullets:[], mines:[], particles:[],
+    captureHold:{ally:0,enemy:0}, captureLeader:null,
+    baseHold:{ally:0,enemy:0},
+    ended:false, seed: Math.floor(Math.random()*99999)
+  };
+  logLines=[];
+  const ms = RUN.mapSize;
+  const allyBase = {x:130,y:ms-130};
+  const enemyBase = {x:ms-130,y:130};
+  const cap = {x:ms/2,y:ms/2};
+  RUN.allyBase=allyBase; RUN.enemyBase=enemyBase; RUN.capture=cap; RUN.capRadius=Math.max(120,ms*0.09);
+
+  // формуємо команди
+  const rng = seededRng(RUN.seed);
+  function spawnTeam(team, base, comp, playerCls){
+    let placedPlayer=false;
+    comp.forEach((clsKey,i)=>{
+      const isP = (team==='ally' && !placedPlayer && clsKey===playerCls);
+      const ang = rng()*Math.PI*2, r=rng()*90;
+      const x = clamp(base.x+Math.cos(ang)*r,40,ms-40);
+      const y = clamp(base.y+Math.sin(ang)*r,40,ms-40);
+      const ent = makeEntity(team,clsKey,x,y, isP);
+      if(isP){ placedPlayer=true; RUN.player=ent; }
+      RUN.entities.push(ent);
+    });
+  }
+  spawnTeam('ally',allyBase,TEAM_COMPOSITION,CHOICE.cls);
+  spawnTeam('enemy',enemyBase,TEAM_COMPOSITION,null);
+
+  // рельєф карти — власна структура для кожної з 4 карт, детерміновано за сідом
+  const layout = buildMapLayout(RUN.mapKey, ms, RUN.seed+7, allyBase, enemyBase, cap, RUN.capRadius);
+  RUN.covers = layout.covers; RUN.swamps = layout.swamps;
+
+  document.getElementById('opLabel').textContent = `ОПЕРАЦІЯ: ${MAPS[RUN.mapKey].name.toUpperCase()} // MAP ${ms}`;
+  goto_('battle');
+  pushLog(`Місію розпочато. Клас: ${CLASSES[CHOICE.cls].name}.`);
+  RUN.lastT = performance.now();
+  requestAnimationFrame(loop);
+}
+
+function pushLog(t){
+  logLines.push(t);
+  if(logLines.length>6) logLines.shift();
+  const el=document.getElementById('logfeed');
+  el.innerHTML = logLines.map(l=>`<div>› ${l}</div>`).join('');
+}
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.style.opacity=1;
+  clearTimeout(toast._t);
+  toast._t=setTimeout(()=>{el.style.opacity=0;},2600);
+}
+
+/* ---------- ГОЛОВНИЙ ЦИКЛ ---------- */
+function loop(now){
+  if(!RUN.active) return;
+  let dt = (now - RUN.lastT)/1000; RUN.lastT = now;
+  dt = Math.min(dt,0.05);
+  update(dt);
+  render();
+  if(RUN.active) requestAnimationFrame(loop);
+}
+
+function update(dt){
+  if(RUN.ended) return;
+  RUN.timeLeft -= dt;
+  RUN.radarTimer += dt;
+  if(RUN.radarTimer>=35){ RUN.radarTimer=0; RUN.radarActive=4; showRadarPulse(); }
+  if(RUN.radarActive>0){ RUN.radarActive-=dt; }
+
+  updatePlayer(dt);
+  RUN.entities.forEach(e=>{ if(e!==RUN.player && !e.dead) updateBot(e,dt); });
+  RUN.entities.forEach(e=>{ if(!e.dead) updateCommon(e,dt); });
+  RUN.entities.forEach(e=>{ if(!e.dead) updateDrone(e,dt); });
+  updateBullets(dt);
+  updateMines(dt);
+  updateCapture(dt);
+  updateBase(dt);
+  updateParticles(dt);
+  checkWinConditions();
+  updateHUD();
+}
+
+/* ---------- ГРАВЕЦЬ ---------- */
+function updatePlayer(dt){
+  const p = RUN.player;
+  if(!p || p.dead) return;
+  let dx=0,dy=0;
+  if(keys['KeyW']||keys['ArrowUp']) dy-=1;
+  if(keys['KeyS']||keys['ArrowDown']) dy+=1;
+  if(keys['KeyA']||keys['ArrowLeft']) dx-=1;
+  if(keys['KeyD']||keys['ArrowRight']) dx+=1;
+  const len=Math.hypot(dx,dy);
+
+  if(p.droneState!=='idle'){
+    // тіло нерухоме під час запуску/керування дроном
+    if(p.droneState==='active' && len>0){
+      const ndx=dx/len, ndy=dy/len;
+      let nx=p.droneX+ndx*DRONE_SPEED*dt, ny=p.droneY+ndy*DRONE_SPEED*dt;
+      const lx=nx-p.x, ly=ny-p.y, ld=Math.hypot(lx,ly);
+      if(ld>DRONE_LEASH){ nx=p.x+lx/ld*DRONE_LEASH; ny=p.y+ly/ld*DRONE_LEASH; }
+      p.droneX=clamp(nx,10,RUN.mapSize-10); p.droneY=clamp(ny,10,RUN.mapSize-10);
+    }
+    p.standStill+=dt;
+    const worldMouseX = mouse.x+camX, worldMouseY=mouse.y+camY;
+    p.angle = Math.atan2(worldMouseY-p.y, worldMouseX-p.x);
+    if(mouse.down || keys['Space']) tryShoot(p);
+    return;
+  }
+
+  if(!p.downed){
+    let sp = p.speed * (p.speedBuffT>0?1.5:1) * (inSwamp(p) && CLASSES[p.cls].ability!=='terrain' ? 0.45:1);
+    if(len>0){
+      dx/=len; dy/=len;
+      moveEntity(p, p.x+dx*sp*dt, p.y+dy*sp*dt);
+      p.standStill=0;
+    } else { p.standStill+=dt; }
+    const worldMouseX = mouse.x+camX, worldMouseY=mouse.y+camY;
+    p.angle = Math.atan2(worldMouseY-p.y, worldMouseX-p.x);
+    if(mouse.down || keys['Space']) tryShoot(p);
+  }
+}
+function inSwamp(e){
+  return RUN.swamps.some(s=>Math.hypot(e.x-s.x,e.y-s.y)<s.r);
+}
+
+/* ---------- СПІЛЬНЕ ОНОВЛЕННЯ (перезарядка, кулдауни, відродження/порятунок) ---------- */
+function updateCommon(e,dt){
+  e.weapons.forEach(wk=>{
+    const w=WEAPONS[wk], st=e.ammoState[wk];
+    if(st.reloading){
+      st.reloadT-=dt;
+      if(st.reloadT<=0){ st.reloading=false;
+        const need = w.mag-st.mag;
+        const take = Math.min(need,st.reserve);
+        st.mag+=take; st.reserve-=take;
+      }
+    }
+    if(st.shotT>0) st.shotT-=dt;
+  });
+  if(e.abilityCd>0) e.abilityCd-=dt;
+  if(e.itemCd>0) e.itemCd-=dt;
+  if(e.speedBuffT>0) e.speedBuffT-=dt;
+  if(e.droneReveal>0) e.droneReveal-=dt;
+  if(e.stunT>0) e.stunT-=dt;
+
+  if(e.downed){
+    e.downedAt+=dt;
+    if(e.downedAt>60){ e.dead=true; e.downed=false; pushLog(`${teamLabel(e.team)} ${CLASSES[e.cls].name} остаточно вибув з бою.`); }
+  }
+}
+function teamLabel(t){ return t==='ally'?'Союзний':'Ворожий'; }
+
+/* ---------- СТРІЛЬБА ---------- */
+function tryShoot(e){
+  if(e.downed||e.dead) return;
+  const w = WEAPONS[e.weaponKey];
+  const st = e.ammoState[e.weaponKey];
+
+  if(w.melee){
+    if(st.shotT>0) return;
+    st.shotT = w.shotCd||0.5;
+    meleeAttack(e, w.dmg, w.maxR);
+    SND.shot();
+    return;
+  }
+
+  if(st.reloading || st.shotT>0) return;
+  if(st.mag<=0){
+    if(st.reserve>0){ tryReload(e); }
+    else if(e.isPlayer){ toast('Немає патронів — перемкніть зброю (колесо миші)'); }
+    return;
+  }
+  st.mag--; st.shotT=w.shotCd;
+  const pellets = w.pellets||1;
+  for(let i=0;i<pellets;i++){
+    let ang = e.angle;
+    if(w.spreadDeg){ ang += (rand(-1,1)) * (w.spreadDeg*Math.PI/180); }
+    else if(w.mag>10){ ang += rand(-1,1)*0.03; }
+    RUN.bullets.push({
+      x:e.x+Math.cos(e.angle)*e.radius, y:e.y+Math.sin(e.angle)*e.radius,
+      dx:Math.cos(ang), dy:Math.sin(ang), spd:w.bSpeed, team:e.team, owner:e,
+      weaponKey:e.weaponKey, traveled:0, alive:true
+    });
+  }
+  if(e.weaponKey==='sniper_rifle') SND.sniperShot(); else if(e.weaponKey==='mortar'||e.weaponKey==='grenade_launcher') SND.explosion(); else SND.shot();
+  if(CLASSES[e.cls].ability==='mortar_reveal' && e.weaponKey==='mortar'){
+    e._mortarStealthDrop = 4.5;
+  }
+}
+function tryReload(e){
+  if(e.downed||e.dead) return;
+  const w=WEAPONS[e.weaponKey];
+  if(w.melee) return;
+  const st=e.ammoState[e.weaponKey];
+  if(st.reloading || st.mag>=w.mag || st.reserve<=0) return;
+  st.reloading=true; st.reloadT=w.reload||1.5;
+}
+function meleeAttack(e,dmg,range){
+  RUN.entities.forEach(t=>{
+    if(t.team!==e.team && !t.dead && !t.downed && dist(e,t)<(range||38)){
+      dealDamage(t,dmg,e);
+    }
+  });
+}
+
+/* ---------- ЗДІБНОСТІ ТА ПРЕДМЕТИ ---------- */
+function tryAbility(e){
+  if(e.downed||e.dead) return;
+  const ab = CLASSES[e.cls].ability;
+  if(ab==='heal_revive'){
+    if(e.abilityCd>0) return;
+    e.abilityCd = ABILITIES.heal_revive.cd;
+    let did=false;
+    RUN.entities.forEach(t=>{
+      if(t.team===e.team && t!==e && dist(e,t)<110){
+        if(t.downed){ t.downed=false; t.hp=Math.round(t.maxHp*0.5); did=true; pushLog(`Медик врятував союзника (${CLASSES[t.cls].name}).`); SND.heal(); }
+        else if(!t.dead && t.hp<t.maxHp){ t.hp=Math.min(t.maxHp,t.hp+30); did=true; }
+      }
+    });
+    if(!e.dead && e.hp<e.maxHp){ e.hp=Math.min(e.maxHp,e.hp+15); did=true; }
+    if(did){ SND.heal(); spawnParticle(e.x,e.y,'#4ade80'); if(e.isPlayer) toast('Аура лікування активована'); }
+    else if(e.isPlayer) toast('Немає кого лікувати поруч');
+  } else if(ab==='drone'){
+    if(e.droneState==='idle'){
+      if(e.abilityCd>0){ if(e.isPlayer) toast('Дрон ще перезаряджається: '+Math.ceil(e.abilityCd)+'с'); return; }
+      e.droneState='launching'; e.droneTimer=5.0; e.droneX=e.x; e.droneY=e.y;
+      if(e.isPlayer) toast('Запуск дрона... 5с нерухомості');
+      pushLog(`${teamLabel(e.team)} розвідник запускає дрон.`);
+    } else {
+      recallDrone(e);
+    }
+  } else if(e.isPlayer){
+    toast('Пасивна здібність: ' + ABILITIES[ab].name);
+  }
+}
+function recallDrone(e){
+  e.droneState='idle'; e.droneTimer=0; e.abilityCd=ABILITIES.drone.cd;
+  if(e.isPlayer) toast('Дрон повернуто');
+  else pushLog(`${teamLabel(e.team)} розвідник повернув дрон.`);
+}
+function updateDrone(e,dt){
+  if(CLASSES[e.cls].ability!=='drone' || e.droneState==='idle') return;
+  if(e.droneState==='launching'){
+    e.droneTimer-=dt;
+    if(e.droneTimer<=0){
+      e.droneState='active';
+      e.droneHoldTimer = e.isPlayer ? Infinity : rand(7,12);
+      if(e.isPlayer) toast('Дрон у повітрі — WASD керує ним, E повертає назад');
+    }
+    return;
+  }
+  // active
+  if(!e.isPlayer){
+    e.droneHoldTimer-=dt;
+    if(e.droneHoldTimer<=0){ recallDrone(e); return; }
+  }
+  RUN.entities.forEach(t=>{
+    if(t.team!==e.team && !t.dead && Math.hypot(e.droneX-t.x,e.droneY-t.y)<DRONE_RADIUS){
+      t.droneReveal = Math.max(t.droneReveal,0.35);
+    }
+  });
+}
+function tryItem(e){
+  if(e.downed||e.dead) return;
+  const itemKey = CLASSES[e.cls].item;
+  if(!itemKey) { if(e.isPlayer) toast('У цього класу немає спорядження'); return; }
+  if(e.itemCd>0) return;
+  e.itemCd = ITEMS[itemKey].cd;
+  if(itemKey==='mine'){
+    RUN.mines.push({x:e.x,y:e.y,team:e.team,armed:0});
+    if(e.isPlayer) toast('Міну встановлено');
+  } else if(itemKey==='frag'){
+    const wx=e.x+Math.cos(e.angle)*260, wy=e.y+Math.sin(e.angle)*260;
+    RUN.bullets.push({x:e.x,y:e.y,dx:(wx-e.x)/260,dy:(wy-e.y)/260,spd:520,team:e.team,owner:e,weaponKey:'__frag',traveled:0,alive:true,life:260/520});
+    if(e.isPlayer) toast('Граната кинута');
+  } else if(itemKey==='energy'){
+    e.speedBuffT=10; e.hp=Math.min(e.maxHp,e.hp+10);
+    if(e.isPlayer) toast('Енергетик: +швидкість, +10 HP');
+  } else if(itemKey==='medkit'){
+    let target=e;
+    RUN.entities.forEach(t=>{ if(t.team===e.team && t!==e && !t.dead && !t.downed && dist(e,t)<70 && t.hp<t.maxHp) target=t; });
+    target.hp=Math.min(target.maxHp,target.hp+60);
+    SND.heal();
+    if(e.isPlayer) toast('Аптечку використано (+60 HP)');
+  }
+}
+
+/* ---------- КУЛІ ---------- */
+function updateBullets(dt){
+  RUN.bullets.forEach(b=>{
+    if(!b.alive) return;
+    const step = b.spd*dt;
+    b.x+=b.dx*step; b.y+=b.dy*step; b.traveled+=step;
+    if(b.x<0||b.x>RUN.mapSize||b.y<0||b.y>RUN.mapSize){ b.alive=false; return; }
+    if(b.weaponKey==='__frag'){
+      b.life-=dt;
+      if(b.life<=0){ explode(b.x,b.y,90,75,b.team,true); b.alive=false; }
+      return;
+    }
+    const w = WEAPONS[b.weaponKey];
+    const r = wRange(w);
+    if(r.maxR && b.traveled > r.maxR*1.08 + 20){ b.alive=false; return; }
+    // укриття блокує лінію пострілу
+    if(blockedAt(b.x,b.y)){
+      b.alive=false;
+      if(w.splash) explode(b.x,b.y,w.splash,w.dmg*0.6,b.team,false);
+      spawnParticle(b.x,b.y,'#8a8a80',10);
+      return;
+    }
+    // перевірка попадання
+    let hit=null;
+    RUN.entities.forEach(t=>{
+      if(hit||t.dead||t.team===b.team||t.downed) return;
+      if(dist(b,t)<t.radius+4) hit=t;
+    });
+    if(hit){
+      b.alive=false;
+      if(w.splash){
+        explode(b.x,b.y,w.splash,w.dmg,b.team,true);
+      } else {
+        let dmg = w.dmg;
+        if(w.dmgMax!==undefined){
+          const t2 = clamp((b.traveled-r.minR)/Math.max(1,(r.maxR-r.minR)),0,1);
+          dmg = w.dmgMax - t2*(w.dmgMax-w.dmgMin);
+        }
+        dealDamage(hit,dmg,b.owner);
+      }
+    }
+  });
+  RUN.bullets = RUN.bullets.filter(b=>b.alive);
+}
+function explode(x,y,radius,dmg,team,stun){
+  spawnParticle(x,y,'#f97316',radius);
+  SND.explosion();
+  RUN.entities.forEach(t=>{
+    if(t.dead||t.downed) return;
+    const d=dist({x,y},t);
+    if(d<radius){
+      const falloff = 1-(d/radius)*0.5;
+      dealDamage(t, dmg*falloff, null, team);
+      if(stun && t.team!==team){ t.stunT=Math.max(t.stunT||0,1.0); }
+    }
+  });
+}
+function spawnParticle(x,y,color,r){
+  RUN.particles.push({x,y,color,r:r||30,t:0,life:0.4});
+}
+function updateParticles(dt){
+  RUN.particles.forEach(p=>p.t+=dt);
+  RUN.particles = RUN.particles.filter(p=>p.t<p.life);
+}
+function updateMines(dt){
+  RUN.mines.forEach(m=>{ m.armed+=dt; });
+  RUN.mines = RUN.mines.filter(m=>{
+    if(m.armed<0.6) return true;
+    let hit=null;
+    RUN.entities.forEach(t=>{ if(!hit && !t.dead && !t.downed && t.team!==m.team && dist(m,t)<26) hit=t; });
+    if(hit){ dealDamage(hit,999,null,m.team); explode(m.x,m.y,60,20,m.team,false); pushLog(`Міна знищила ${CLASSES[hit.cls].name}.`); return false; }
+    return true;
+  });
+}
+
+function dealDamage(target,rawDmg,attacker,attackerTeam){
+  if(target.dead||target.downed) return;
+  const mitig = Math.max(1, rawDmg - target.armor*0.6);
+  target.hp -= mitig;
+  SND.hit();
+  if(target.isPlayer){ flashDamage(); }
+  if(target.hp<=0 && !target.downed){
+    target.hp=0; target.downed=true; target.downedAt=0;
+    SND.down();
+    const kt = attacker? attacker.team : attackerTeam;
+    if(kt && kt!==target.team){
+      const killer = attacker;
+      if(killer){ killer.kills=(killer.kills||0)+1; }
+    }
+    pushLog(`${teamLabel(target.team)} ${CLASSES[target.cls].name} підбитий${target.team==='ally'&&target.isPlayer?' (ВИ)':''}.`);
+    if(target.isPlayer) toast('Вас підбито! Союзний медик може вас врятувати протягом 60с.');
+  }
+}
+let dmgFlashT=0;
+function flashDamage(){ dmgFlashT=0.18; }
+
+/* ---------- ШІ БОТІВ ---------- */
+const COVER_SEEKERS = ['sniper','mortarman','fpv','medic','grenadier'];
+function pickBestWeapon(e, targetDist){
+  if(!e.weapons || e.weapons.length<2) return;
+  let best=e.weaponKey, bestScore=-1e9;
+  e.weapons.forEach(wk=>{
+    const w=WEAPONS[wk], st=e.ammoState[wk], rr=wRange(w);
+    if(!w.melee && st.mag<=0 && st.reserve<=0) return; // зброя без набоїв — пропускаємо
+    let score;
+    if(w.melee){ score = targetDist < rr.maxR*1.3 ? 40 : -50; }
+    else if(targetDist>=rr.minR*0.6 && targetDist<=rr.maxR*1.1){ score = 100 - Math.abs(targetDist-(rr.minR+rr.maxR)/2)/40; }
+    else { score = -Math.min(Math.abs(targetDist-rr.maxR), Math.abs(targetDist-rr.minR)); }
+    if(score>bestScore){ bestScore=score; best=wk; }
+  });
+  if(best!==e.weaponKey){ e.weaponIdx=e.weapons.indexOf(best); e.weaponKey=best; }
+}
+function updateBot(e,dt){
+  if(e.downed) return;
+  if(e.droneState!=='idle'){
+    // тіло бота нерухоме, поки він керує дроном — але може відстрілюватись
+    const enemies = RUN.entities.filter(t=>t.team!==e.team && !t.dead && !t.downed);
+    let target=null, bestD=Infinity;
+    enemies.forEach(t=>{ const d=dist(e,t); if(canSee(e,t) && d<bestD){ bestD=d; target=t; } });
+    if(target){
+      e.angle = Math.atan2(target.y-e.y, target.x-e.x);
+      const w=WEAPONS[e.weaponKey], r=wRange(w);
+      if(bestD<=r.maxR*1.05 && hasLineOfSight(e,target)) tryShoot(e);
+      const st=e.ammoState[e.weaponKey];
+      if(!w.melee && st.mag<=0 && !st.reloading) tryReload(e);
+    }
+    e.standStill+=dt;
+    return;
+  }
+  const enemies = RUN.entities.filter(t=>t.team!==e.team && !t.dead && !t.downed);
+  let target=null, bestD=Infinity;
+  enemies.forEach(t=>{
+    const d=dist(e,t);
+    if(canSee(e,t) && d<bestD){ bestD=d; target=t; }
+  });
+  if(target) pickBestWeapon(e, bestD);
+  const w = WEAPONS[e.weaponKey];
+  const r = wRange(w);
+
+  let moveX=0,moveY=0, wantShoot=false;
+
+  if(target){
+    e.state='engage';
+    e.angle = Math.atan2(target.y-e.y, target.x-e.x);
+    const wantsCover = e.hp < e.maxHp*0.55 || COVER_SEEKERS.includes(e.cls);
+    let handled=false;
+    if(wantsCover){
+      const cov = nearestCover(e.x,e.y, Math.min(520, r.maxR*0.9));
+      if(cov){
+        // стати з протилежного від ворога боку укриття
+        const awayA = Math.atan2(e.y-target.y, e.x-target.x);
+        const rad = (cov.r||Math.max(cov.w||0,cov.h||0)/2)+30;
+        const standX = cov.x+Math.cos(awayA)*rad, standY = cov.y+Math.sin(awayA)*rad;
+        const dCover = Math.hypot(e.x-standX, e.y-standY);
+        if(dCover>28){ moveX=(standX-e.x)/dCover; moveY=(standY-e.y)/dCover; handled=true; }
+        else { moveX=0; moveY=0; handled=true; } // вже в укритті — стоїмо й стріляємо
+      }
+    }
+    if(!handled){
+      if(bestD > r.maxR*0.85){ moveX=Math.cos(e.angle); moveY=Math.sin(e.angle); }
+      else if(r.minR>0 && bestD < r.minR*0.7){ moveX=-Math.cos(e.angle); moveY=-Math.sin(e.angle); }
+      else if(!['sniper','mortarman','grenadier'].includes(e.cls)){ moveX=Math.cos(e.angle)*0.2; moveY=Math.sin(e.angle)*0.2; }
+    }
+    if(bestD <= r.maxR*1.05 && hasLineOfSight(e,target)) wantShoot=true;
+  } else {
+    e.state='patrol';
+    if(!e.patrolTarget || dist(e,e.patrolTarget)<40){
+      const cap = RUN.capture;
+      let dest;
+      if(Math.random()<0.55){ dest = {x:cap.x+rand(-160,160), y:cap.y+rand(-160,160)}; }
+      else { const base = e.team==='ally'?RUN.allyBase:RUN.enemyBase;
+        dest = {x:clamp(base.x+rand(-260,260),40,RUN.mapSize-40), y:clamp(base.y+rand(-260,260),40,RUN.mapSize-40)}; }
+      // рух від укриття до укриття замість прямої лінії по відкритому простору
+      const step = nearestCover((e.x+dest.x)/2,(e.y+dest.y)/2, 260);
+      e.patrolTarget = (step && Math.random()<0.6) ? {x:step.x+rand(-20,20),y:step.y+rand(-20,20)} : dest;
+    }
+    const a = Math.atan2(e.patrolTarget.y-e.y, e.patrolTarget.x-e.x);
+    e.angle=a; moveX=Math.cos(a); moveY=Math.sin(a);
+  }
+
+  // медик-бот: пріоритетно лікує/рятує
+  if(CLASSES[e.cls].ability==='heal_revive'){
+    let downedAlly=null, hurtAlly=null, bestHurt=1e9;
+    RUN.entities.forEach(t=>{
+      if(t.team===e.team && t!==e){
+        if(t.downed && !downedAlly && dist(e,t)<450) downedAlly=t;
+        if(!t.dead && !t.downed && t.hp<t.maxHp*0.6 && dist(e,t)<450 && t.hp<bestHurt){ hurtAlly=t; bestHurt=t.hp; }
+      }
+    });
+    const goal = downedAlly||hurtAlly;
+    if(goal && !target){
+      const d=dist(e,goal);
+      if(d>90){ e.angle=Math.atan2(goal.y-e.y,goal.x-e.x); moveX=Math.cos(e.angle); moveY=Math.sin(e.angle); }
+      else if(e.abilityCd<=0){ tryAbility(e); }
+    }
+  }
+
+  const sp = e.speed*(e.speedBuffT>0?1.5:1) * (inSwamp(e)&&CLASSES[e.cls].ability!=='terrain'?0.45:1) * (e.stunT>0?0.2:1);
+  const len=Math.hypot(moveX,moveY);
+  if(len>0.01){
+    moveX/=len; moveY/=len;
+    moveEntity(e, e.x+moveX*sp*dt, e.y+moveY*sp*dt);
+    e.standStill=0;
+  } else e.standStill+=dt;
+
+  if(wantShoot && e.stunT<=0 && Math.random()<0.9) tryShoot(e);
+  const st = e.ammoState[e.weaponKey];
+  if(!w.melee && st.mag<=0 && !st.reloading && e.stunT<=0) tryReload(e);
+
+  // випадкове застосування предметів ботами
+  if(CLASSES[e.cls].item && e.itemCd<=0 && target && Math.random()<0.01){
+    if(CLASSES[e.cls].item==='frag' && bestD<300) tryItem(e);
+    if(CLASSES[e.cls].item==='mine' && !target) tryItem(e);
+    if(CLASSES[e.cls].item==='energy' && e.hp<e.maxHp*0.7) tryItem(e);
+  }
+  if(CLASSES[e.cls].ability==='drone' && e.abilityCd<=0 && Math.random()<0.003) tryAbility(e);
+}
+
+/* ---------- ТОЧКА ЗАХОПЛЕННЯ ТА БАЗА ---------- */
+function updateCapture(dt){
+  const cap=RUN.capture;
+  let a=0,b=0;
+  RUN.entities.forEach(e=>{ if(!e.dead && !e.downed && dist(e,cap)<RUN.capRadius){ if(e.team==='ally') a++; else b++; } });
+  if(a>0&&b===0){ RUN.captureHold.ally+=dt; RUN.captureHold.enemy=Math.max(0,RUN.captureHold.enemy-dt*2); RUN.captureLeader='ally'; }
+  else if(b>0&&a===0){ RUN.captureHold.enemy+=dt; RUN.captureHold.ally=Math.max(0,RUN.captureHold.ally-dt*2); RUN.captureLeader='enemy'; }
+  else { RUN.captureHold.ally=Math.max(0,RUN.captureHold.ally-dt*0.5); RUN.captureHold.enemy=Math.max(0,RUN.captureHold.enemy-dt*0.5); if(a===0&&b===0) RUN.captureLeader=null; else RUN.captureLeader='contested'; }
+}
+function updateBase(dt){
+  let a=0,b=0;
+  RUN.entities.forEach(e=>{ if(!e.dead && !e.downed && e.team==='ally' && dist(e,RUN.enemyBase)<130) a++; });
+  RUN.entities.forEach(e=>{ if(!e.dead && !e.downed && e.team==='enemy' && dist(e,RUN.allyBase)<130) b++; });
+  if(a>0) RUN.baseHold.ally+=dt; else RUN.baseHold.ally=Math.max(0,RUN.baseHold.ally-dt);
+  if(b>0) RUN.baseHold.enemy+=dt; else RUN.baseHold.enemy=Math.max(0,RUN.baseHold.enemy-dt);
+}
+
+/* ---------- ПЕРЕМОГА/ПОРАЗКА ---------- */
+function checkWinConditions(){
+  if(RUN.ended) return;
+  const aliveAlly = RUN.entities.filter(e=>e.team==='ally' && !e.dead).length;
+  const aliveEnemy = RUN.entities.filter(e=>e.team==='enemy' && !e.dead).length;
+
+  if(aliveEnemy===0) return finishMatch('ally','elimination');
+  if(aliveAlly===0) return finishMatch('enemy','elimination');
+  if(RUN.captureHold.ally>=180) return finishMatch('ally','capture');
+  if(RUN.captureHold.enemy>=180) return finishMatch('enemy','capture');
+  if(RUN.baseHold.ally>=45) return finishMatch('ally','base');
+  if(RUN.baseHold.enemy>=45) return finishMatch('enemy','base');
+  if(RUN.timeLeft<=0){
+    if(RUN.captureLeader==='ally') return finishMatch('ally','timeout-hold');
+    if(RUN.captureLeader==='enemy') return finishMatch('enemy','timeout-hold');
+    if(aliveAlly>aliveEnemy) return finishMatch('ally','timeout-count');
+    if(aliveEnemy>aliveAlly) return finishMatch('enemy','timeout-count');
+    return finishMatch('draw','timeout-draw');
+  }
+}
+function finishMatch(winner,reason){
+  RUN.ended=true;
+  setTimeout(()=>showEndScreen(winner,reason), 400);
+}
+function endMission(){ stopMatch(true); goto_('menu'); }
+function stopMatch(navigate){
+  RUN.active=false;
+  if(navigate){ /* нічого */ }
+}
+
+function showEndScreen(winner,reason){
+  RUN.active=false;
+  const titleEl=document.getElementById('endTitle');
+  const subEl=document.getElementById('endSub');
+  const playerWon = winner==='ally';
+  titleEl.textContent = winner==='draw' ? 'НІЧИЯ' : (playerWon?'ПЕРЕМОГА':'ПОРАЗКА');
+  titleEl.style.color = winner==='draw' ? '#e5e7eb' : (playerWon?'#a3e635':'#ef4444');
+  const reasons = {
+    elimination:'Знищено весь склад противника.',
+    capture:'Центральну точку утримано 3 хвилини.',
+    base:'Ворожу базу захоплено.',
+    'timeout-hold':'Час вийшов — перемогла команда, що утримувала точку.',
+    'timeout-count':'Час вийшов — перемогла команда з більшою кількістю бійців.',
+    'timeout-draw':'Час вийшов — сили рівні.'
+  };
+  subEl.textContent = reasons[reason]||'';
+  const aliveAlly = RUN.entities.filter(e=>e.team==='ally'&&!e.dead).length;
+  const aliveEnemy = RUN.entities.filter(e=>e.team==='enemy'&&!e.dead).length;
+  const kills = RUN.player? (RUN.player.kills||0):0;
+  document.getElementById('endStats').innerHTML = `
+    <div class="hud-grid" style="grid-template-columns:1fr 1fr;font-size:.85rem;gap:14px;">
+      <div class="hud-stat"><b>${MAPS[RUN.mapKey].name}</b><br><span class="muted">Карта</span></div>
+      <div class="hud-stat"><b>${RUN.sizeInfo.label}</b><br><span class="muted">Розмір</span></div>
+      <div class="hud-stat"><b>${CLASSES[RUN.playerCls].name}</b><br><span class="muted">Ваш клас</span></div>
+      <div class="hud-stat"><b>${kills}</b><br><span class="muted">Ваші підтверджені ураження</span></div>
+      <div class="hud-stat"><b style="color:var(--ally)">${aliveAlly}/10</b><br><span class="muted">Союзники живі</span></div>
+      <div class="hud-stat"><b style="color:var(--enemy)">${aliveEnemy}/10</b><br><span class="muted">Вороги живі</span></div>
+    </div>`;
+  goto_('end');
+}
+
+/* ---------- РАДАР ---------- */
+function showRadarPulse(){
+  const el=document.getElementById('radarNotice');
+  el.style.opacity=1;
+  setTimeout(()=>{el.style.opacity=0;},2600);
+  pushLog('Супутникова розвідка: позиції ворогів оновлено.');
+}
+
+/* ---------- РЕНДЕР ---------- */
+function render(){
+  if(!ctx) return;
+  const p = RUN.player;
+  camX = clamp((p?p.x:RUN.mapSize/2) - CW/2, 0, Math.max(0,RUN.mapSize-CW));
+  camY = clamp((p?p.y:RUN.mapSize/2) - CH/2, 0, Math.max(0,RUN.mapSize-CH));
+
+  const g = ctx.createLinearGradient(0,0,0,CH);
+  g.addColorStop(0, MAPS[RUN.mapKey].grad[0]);
+  g.addColorStop(1, MAPS[RUN.mapKey].grad[1]);
+  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
+
+  // сітка
+  ctx.strokeStyle='rgba(214,168,79,0.07)'; ctx.lineWidth=1;
+  const gridStep=64;
+  for(let x=-((camX)%gridStep); x<CW; x+=gridStep){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,CH); ctx.stroke(); }
+  for(let y=-((camY)%gridStep); y<CH; y+=gridStep){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CW,y); ctx.stroke(); }
+
+  ctx.save();
+  ctx.translate(-camX,-camY);
+
+  // важка місцевість (болото/дюни/озеро — сповільнює, крім рейнджера)
+  RUN.swamps.forEach(s=>{
+    ctx.fillStyle=s.fill||'rgba(60,90,70,0.35)';
+    ctx.beginPath(); ctx.ellipse(s.x,s.y,s.r,s.r*0.7,0,0,Math.PI*2); ctx.fill();
+  });
+  // укриття (будівлі/скелі/кущі/крижані брили — блокують рух і постріли)
+  RUN.covers.forEach(c=>{
+    ctx.fillStyle=c.fill||'rgba(90,80,60,0.55)'; ctx.strokeStyle=c.stroke||'rgba(214,168,79,0.35)'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    if(c.shape==='rect'){ ctx.rect(c.x-c.w/2,c.y-c.h/2,c.w,c.h); }
+    else { ctx.arc(c.x,c.y,c.r,0,Math.PI*2); }
+    ctx.fill(); ctx.stroke();
+  });
+
+  // бази
+  drawBase(RUN.allyBase,'#3b82f6','СОЮЗНА БАЗА');
+  drawBase(RUN.enemyBase,'#ef4444','ВОРОЖА БАЗА');
+
+  // точка захоплення
+  const cap=RUN.capture;
+  ctx.beginPath(); ctx.arc(cap.x,cap.y,RUN.capRadius,0,Math.PI*2);
+  ctx.strokeStyle = RUN.captureLeader==='ally'?'#3b82f6':RUN.captureLeader==='enemy'?'#ef4444':'#a3e635';
+  ctx.lineWidth=3; ctx.setLineDash([10,8]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(163,230,53,0.06)'; ctx.fill();
+  ctx.fillStyle='#a3e635'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('ЦЕНТР', cap.x, cap.y-6);
+  ctx.fillText(Math.max(RUN.captureHold.ally,RUN.captureHold.enemy).toFixed(0)+'/180', cap.x, cap.y+10);
+
+  // міни
+  RUN.mines.forEach(m=>{
+    ctx.fillStyle = m.team==='ally'?'rgba(59,130,246,.8)':'rgba(239,68,68,.8)';
+    ctx.beginPath(); ctx.arc(m.x,m.y,6,0,Math.PI*2); ctx.fill();
+  });
+
+  // частинки вибухів
+  RUN.particles.forEach(pt=>{
+    const alpha = 1-(pt.t/pt.life);
+    ctx.beginPath(); ctx.arc(pt.x,pt.y,pt.r*(pt.t/pt.life+0.2),0,Math.PI*2);
+    ctx.fillStyle=`rgba(249,115,22,${alpha*0.5})`; ctx.fill();
+  });
+
+  // кулі
+  RUN.bullets.forEach(b=>{
+    const w = WEAPONS[b.weaponKey]||{color:'#facc15'};
+    ctx.fillStyle = b.weaponKey==='__frag'?'#84cc16':w.color;
+    ctx.beginPath(); ctx.arc(b.x,b.y, b.weaponKey==='__frag'?5:3,0,Math.PI*2); ctx.fill();
+  });
+
+  // сутності
+  RUN.entities.forEach(e=>{ if(!e.dead) drawEntity(e); });
+
+  // дрони
+  RUN.entities.forEach(e=>{
+    if(e.droneState==='idle') return;
+    const mineOrVisible = e.team==='ally' || RUN.radarActive>0;
+    if(!mineOrVisible) return;
+    if(e.droneState==='active'){
+      ctx.strokeStyle = e.team==='ally' ? 'rgba(167,139,250,0.32)' : 'rgba(239,68,68,0.28)';
+      ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(e.droneX,e.droneY,DRONE_RADIUS,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle = e.team==='ally' ? '#a78bfa' : '#ef4444';
+      ctx.beginPath(); ctx.arc(e.droneX,e.droneY,7,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+      ctx.strokeStyle=ctx.fillStyle; ctx.beginPath(); ctx.moveTo(e.x,e.y); ctx.lineTo(e.droneX,e.droneY); ctx.setLineDash([2,4]); ctx.stroke(); ctx.setLineDash([]);
+    } else if(e.droneState==='launching'){
+      ctx.fillStyle='rgba(167,139,250,0.6)';
+      ctx.beginPath(); ctx.arc(e.x,e.y-28,5,0,Math.PI*2); ctx.fill();
+    }
+  });
+
+  ctx.restore();
+
+  if(dmgFlashT>0){
+    dmgFlashT-=1/60;
+    ctx.fillStyle=`rgba(239,68,68,${dmgFlashT*1.6})`;
+    ctx.fillRect(0,0,CW,CH);
+  }
+
+  drawMinimap();
+}
+function drawBase(b,color,label){
+  ctx.strokeStyle=color; ctx.lineWidth=2; ctx.setLineDash([6,6]);
+  ctx.strokeRect(b.x-90,b.y-90,180,180); ctx.setLineDash([]);
+  ctx.fillStyle=color; ctx.globalAlpha=0.08; ctx.fillRect(b.x-90,b.y-90,180,180); ctx.globalAlpha=1;
+  ctx.fillStyle=color; ctx.font='bold 11px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(label, b.x, b.y-98);
+}
+function drawEntity(e){
+  const c = CLASSES[e.cls];
+  const color = e.team==='ally' ? (e.isPlayer?'#a3e635':'#3b82f6') : '#ef4444';
+  if(e.downed){
+    ctx.beginPath(); ctx.arc(e.x,e.y,e.radius,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=2; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+    ctx.fillStyle='#ddd'; ctx.fillText('ПІДБИТИЙ', e.x, e.y-22);
+    return;
+  }
+  // видимість: показуємо ворогів лише якщо гравець їх бачить, або радар активний, або союзник
+  if(e.team!=='ally' && !e.isPlayer){
+    const seenByPlayer = RUN.player && (canSee(RUN.player,e) && dist(RUN.player,e)<900);
+    const radar = RUN.radarActive>0 || e.droneReveal>0;
+    if(!seenByPlayer && !radar) return;
+  }
+  ctx.beginPath(); ctx.arc(e.x,e.y,e.radius,0,Math.PI*2);
+  ctx.fillStyle=color; ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,.5)'; ctx.lineWidth=2; ctx.stroke();
+  // напрям погляду
+  ctx.strokeStyle='#000'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(e.x,e.y); ctx.lineTo(e.x+Math.cos(e.angle)*22,e.y+Math.sin(e.angle)*22); ctx.stroke();
+  // іконка класу
+  ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif'; ctx.textAlign='center';
+  ctx.fillText(c.icon, e.x, e.y+5);
+  // смужка hp
+  ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fillRect(e.x-18,e.y-30,36,5);
+  ctx.fillStyle= e.team==='ally'?'#3b82f6':'#ef4444';
+  ctx.fillRect(e.x-18,e.y-30, 36*(e.hp/e.maxHp), 5);
+  if(e.isPlayer){
+    ctx.strokeStyle='#a3e635'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(e.x,e.y,e.radius+5,0,Math.PI*2); ctx.stroke();
+  }
+}
+function drawMinimap(){
+  if(!mini){ mini=document.getElementById('minimap'); mctx=mini.getContext('2d'); }
+  const s=mini.width/RUN.mapSize;
+  mctx.fillStyle='#080c08'; mctx.fillRect(0,0,mini.width,mini.height);
+  mctx.strokeStyle='rgba(214,168,79,.3)'; mctx.strokeRect(0,0,mini.width,mini.height);
+  mctx.fillStyle='rgba(59,130,246,.5)'; mctx.fillRect(RUN.allyBase.x*s-8,RUN.allyBase.y*s-8,16,16);
+  mctx.fillStyle='rgba(239,68,68,.5)'; mctx.fillRect(RUN.enemyBase.x*s-8,RUN.enemyBase.y*s-8,16,16);
+  mctx.strokeStyle='#a3e635'; mctx.beginPath(); mctx.arc(RUN.capture.x*s,RUN.capture.y*s,RUN.capRadius*s,0,Math.PI*2); mctx.stroke();
+  // видима зона камери
+  mctx.strokeStyle='rgba(255,255,255,.4)';
+  mctx.strokeRect(camX*s,camY*s,CW*s,CH*s);
+  RUN.entities.forEach(e=>{
+    if(e.dead) return;
+    if(e.team==='ally'){
+      mctx.fillStyle = e.isPlayer?'#a3e635':'#3b82f6';
+      mctx.beginPath(); mctx.arc(e.x*s,e.y*s,e.isPlayer?4:2.4,0,Math.PI*2); mctx.fill();
+    } else if(RUN.radarActive>0 || e.droneReveal>0){
+      mctx.fillStyle='#ef4444';
+      mctx.beginPath(); mctx.arc(e.x*s,e.y*s,2.6,0,Math.PI*2); mctx.fill();
+    }
+    if(e.droneState==='active' && (e.team==='ally' || RUN.radarActive>0)){
+      mctx.fillStyle = e.team==='ally' ? '#a78bfa' : '#ef4444';
+      mctx.beginPath(); mctx.arc(e.droneX*s,e.droneY*s,2.2,0,Math.PI*2); mctx.fill();
+    }
+  });
+}
+
+/* ---------- HUD ---------- */
+function updateHUD(){
+  const p=RUN.player; if(!p) return;
+  document.getElementById('hudClassName').textContent = CLASSES[p.cls].icon+' '+CLASSES[p.cls].name;
+  document.getElementById('hpFill').style.width = Math.max(0,(p.hp/p.maxHp*100))+'%';
+  document.getElementById('hpText').textContent = Math.max(0,Math.round(p.hp))+'/'+p.maxHp;
+  document.getElementById('statSpeed').textContent = Math.round(p.speed/SPD);
+  document.getElementById('statStealth').textContent = Math.round(effectiveStealth(p));
+  document.getElementById('statArmor').textContent = p.armor;
+  const curW = WEAPONS[p.weaponKey], curSt = p.ammoState[p.weaponKey];
+  document.getElementById('statAmmo').textContent = curW.melee ? '—' : (curSt.reloading?'…':curSt.mag)+'/'+curSt.reserve;
+  document.getElementById('weaponName').textContent = curW.name;
+  const wheelBox = document.getElementById('weaponWheel');
+  wheelBox.innerHTML = p.weapons.map((wk,i)=>{
+    const w=WEAPONS[wk], st=p.ammoState[wk];
+    const empty = !w.melee && st.mag<=0 && st.reserve<=0;
+    return `<span class="wchip ${wk===p.weaponKey?'active':''} ${empty?'empty':''}">${i+1}. ${w.name}</span>`;
+  }).join('');
+
+  const aa = RUN.entities.filter(e=>e.team==='ally'&&!e.dead).length;
+  const ee = RUN.entities.filter(e=>e.team==='enemy'&&!e.dead).length;
+  document.getElementById('allyCount').textContent = aa+'/10';
+  document.getElementById('enemyCount').textContent = ee+'/10';
+  document.getElementById('allyBar').style.width=(aa*10)+'%';
+  document.getElementById('enemyBar').style.width=(ee*10)+'%';
+
+  const holdMax = Math.max(RUN.captureHold.ally,RUN.captureHold.enemy);
+  document.getElementById('captureBar').style.width = clamp(holdMax/180*100,0,100)+'%';
+  document.getElementById('captureBar').style.background = RUN.captureLeader==='ally'?'#3b82f6':RUN.captureLeader==='enemy'?'#ef4444':'#a3e635';
+  document.getElementById('captureLabel').textContent = RUN.captureLeader==='ally'?'Союзники':RUN.captureLeader==='enemy'?'Вороги':'Вільна';
+
+  const mm = Math.max(0,RUN.timeLeft);
+  const mi = Math.floor(mm/60), se=Math.floor(mm%60);
+  document.getElementById('matchClock').textContent = String(mi).padStart(2,'0')+':'+String(se).padStart(2,'0');
+
+  const box=document.getElementById('cooldownsBox');
+  let html='';
+  const abKey=CLASSES[p.cls].ability, ab=ABILITIES[abKey];
+  if(abKey==='drone'){
+    let status;
+    if(p.droneState==='idle') status = p.abilityCd>0 ? Math.ceil(p.abilityCd)+'с' : 'Готово (E)';
+    else if(p.droneState==='launching') status = 'Запуск '+Math.ceil(p.droneTimer)+'с';
+    else status = 'У польоті — E поверне';
+    html+=`<div class="cooldown-pill"><span>E · ${ab.name}</span><span>${status}</span></div>`;
+  } else if(!ab.passive){ html+=`<div class="cooldown-pill"><span>E · ${ab.name}</span><span>${p.abilityCd>0?Math.ceil(p.abilityCd)+'с':'Готово'}</span></div>`; }
+  else { html+=`<div class="cooldown-pill"><span>Пасивно · ${ab.name}</span><span>—</span></div>`; }
+  const itKey=CLASSES[p.cls].item;
+  if(itKey){ html+=`<div class="cooldown-pill"><span>Q · ${ITEMS[itKey].name}</span><span>${p.itemCd>0?Math.ceil(p.itemCd)+'с':'Готово'}</span></div>`; }
+  box.innerHTML=html;
+}
+
+/* ---------- ІНІЦІАЛІЗАЦІЯ ---------- */
+document.getElementById('optSfx').checked=true;
+</script>
+</body>
+</html>
