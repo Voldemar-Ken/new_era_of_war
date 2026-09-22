@@ -285,6 +285,7 @@ const SIZES = [
 const WEAPONS = {
   // minR/maxR — точно дальність зі специфікації × RSCALE. Ефективна дальність у бою
   // додатково множиться на модифікатор карти "дальність" (map.rangeMod) — див. wRange().
+
   sniper_rifle:{name:'Снайперська гвинтівка',minR:100*RSCALE,maxR:300*RSCALE,dmg:100,mag:5,maxAmmo:30,shotCd:1.0,reload:5.0,bSpeed:1400,color:'#facc15'},
   pistol:{name:'Пістолет',minR:0*RSCALE,maxR:30*RSCALE,dmg:24,mag:7,maxAmmo:35,shotCd:0.28,reload:2.0,bSpeed:1100,color:'#e5e7eb'},
   shotgun:{name:'Дробовик',minR:30*RSCALE,maxR:50*RSCALE,dmgMax:45,dmgMin:15,mag:7,maxAmmo:25,shotCd:0.85,reload:4.0,bSpeed:1100,pellets:5,spreadDeg:16,color:'#f97316'},
@@ -305,6 +306,7 @@ function wRange(w){
 
 /* ---------- ДАНІ: ПРЕДМЕТИ ---------- */
 const ITEMS = {
+  molotov:{name:'Коктейль Молотова',desc:'Підпалює ворогів у радіусі 20. Кидок по курсору.',cd:10},
   mine:{name:'Міна',desc:'Ставить пастку. Вибухає під ворогом.',cd:8},
   frag:{name:'Осколкова граната',desc:'75 урону у радіусі, кидок по курсору.',cd:12},
   energy:{name:'Енергетик',desc:'+3 швидкості на 10с, +10 HP.',cd:14},
@@ -326,7 +328,7 @@ const ABILITIES = {
 const CLASSES = {
   sniper:{name:'Снайпер',icon:'⌁',color:'#facc15',speed:6,hp:110,armor:2,stealth:70,weapons:['sniper_rifle','pistol','knife'],ability:'stealth_bonus',item:'mine',role:'Точність · маскування'},
   assault:{name:'Штурмовик',icon:'▥',color:'#f97316',speed:2,hp:220,armor:10,stealth:20,weapons:['shotgun','heavy_mg','sawed_off','iron_knuckles'],ability:'fists',item:null,role:'Броня · прорив'},
-  ranger:{name:'Рейнджер',icon:'✦',color:'#38bdf8',speed:7,hp:140,armor:5,stealth:50,weapons:['assault_rifle','pistol','bayonet'],ability:'terrain',item:'frag',role:'Мобільність · універсальність'},
+  ranger:{name:'Рейнджер',icon:'✦',color:'#38bdf8',speed:7,hp:140,armor:5,stealth:50,weapons:['assault_rifle','pistol','bayonet'],ability:'terrain',item:'frag'+'molotov',role:'Мобільність · універсальність'},
   grenadier:{name:'Гранатометчик',icon:'✹',color:'#84cc16',speed:4,hp:160,armor:7,stealth:30,weapons:['grenade_launcher','pistol','knife'],ability:'splash_stun',item:'energy',role:'Площа · оглушення'},
   medic:{name:'Медик',icon:'＋',color:'#4ade80',speed:9,hp:100,armor:3,stealth:60,weapons:['pistol','knife'],ability:'heal_revive',item:'medkit',role:'Лікування · підтримка'},
   fpv:{name:'Розвідник (FPV)',icon:'◉',color:'#a78bfa',speed:6,hp:90,armor:1,stealth:10,weapons:['assault_rifle'],ability:'drone',item:'frag',role:'Дрон · тактична інформація'},
