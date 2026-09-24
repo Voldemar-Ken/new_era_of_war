@@ -270,10 +270,10 @@ const RSCALE = 3; // масштаб дальностей зі специфіка
 const SPD = 14;   // масштаб швидкості (юніти світу за секунду на 1 "px/с" зі специфікації)
 
 const MAPS = {
-  snow:  {name:'Сніги',           icon:'❄', speedMod:-3, stealthMod:+2, armorMod:0, rangeMod:1.0, grad:['#26313a','#131a1f'], swamp:false, desc:'Швидкість −3 · Маскування +2'},
-  desert:{name:'Пустиня',         icon:'☀', speedMod:0,  stealthMod:-1, armorMod:0, rangeMod:1.5, grad:['#5b4526','#1a140b'], swamp:false, desc:'Маскування −1 · Дальність +50%'},
-  city:  {name:'Покинуте місто',  icon:'▦', speedMod:-1, stealthMod:0,  armorMod:3, rangeMod:1.0, grad:['#3a3a35','#131311'], swamp:true,  desc:'Броня +3 · Швидкість −1'},
-  field: {name:'Поле',            icon:'⌁', speedMod:0,  stealthMod:-4, armorMod:0, rangeMod:2.0, grad:['#3a4a28','#131a10'], swamp:true,  desc:'Маскування −4 · Дальність +100%'}
+  snow:  {name:'Сніги',           icon:'❄', speedMod:-3, stealthMult:1.5,  armorMod:0, rangeMod:1.0, grad:['#26313a','#131a1f'], swamp:false, desc:'Швидкість −3 · Маскування +50%'},
+  desert:{name:'Пустиня',         icon:'☀', speedMod:0,  stealthMult:0.75, armorMod:0, rangeMod:1.5, grad:['#5b4526','#1a140b'], swamp:false, desc:'Маскування −25% · Дальність +50%'},
+  city:  {name:'Покинуте місто',  icon:'▦', speedMod:-1, stealthMult:1.0,  armorMod:3, rangeMod:1.0, grad:['#3a3a35','#131311'], swamp:true,  desc:'Броня +3 · Швидкість −1'},
+  field: {name:'Поле',            icon:'⌁', speedMod:0,  stealthMult:0.5,  armorMod:0, rangeMod:2.0, grad:['#3a4a28','#131a10'], swamp:true,  desc:'Маскування −50% · Дальність +100%'}
 };
 const SIZES = [
   {size:1000, time:600,  label:'1000 × 1000', desc:"Ближній бій · швидке зіткнення"},
@@ -285,7 +285,6 @@ const SIZES = [
 const WEAPONS = {
   // minR/maxR — точно дальність зі специфікації × RSCALE. Ефективна дальність у бою
   // додатково множиться на модифікатор карти "дальність" (map.rangeMod) — див. wRange().
-
   sniper_rifle:{name:'Снайперська гвинтівка',minR:100*RSCALE,maxR:300*RSCALE,dmg:100,mag:5,maxAmmo:30,shotCd:1.0,reload:5.0,bSpeed:1400,color:'#facc15'},
   pistol:{name:'Пістолет',minR:0*RSCALE,maxR:30*RSCALE,dmg:24,mag:7,maxAmmo:35,shotCd:0.28,reload:2.0,bSpeed:1100,color:'#e5e7eb'},
   shotgun:{name:'Дробовик',minR:30*RSCALE,maxR:50*RSCALE,dmgMax:45,dmgMin:15,mag:7,maxAmmo:25,shotCd:0.85,reload:4.0,bSpeed:1100,pellets:5,spreadDeg:16,color:'#f97316'},
@@ -320,7 +319,7 @@ const ABILITIES = {
   terrain:{name:'Прохідність місцевості',desc:'Не сповільнюється у болотах/воді.',passive:true},
   splash_stun:{name:'Приголомшення вибухом',desc:'Вибухи гранатомета оглушують ворогів.',passive:true},
   heal_revive:{name:'Аура лікування / Порятунок',desc:'Лікує союзників поруч і рятує підбитих.',cd:30},
-  drone:{name:'Розвідувальний дрон',desc:'Нерухомість під час керування. Радіус виявлення 300 навколо дрона, керування в межах 50 від бійця.',cd:20},
+  drone:{name:'Розвідувальний дрон',desc:'Нерухомість під час керування. Радіус виявлення 600 навколо дрона, керування в межах 50 від бійця.',cd:20},
   mortar_reveal:{name:'Демаскування пострілом',desc:'Маскування падає після пострілу з міномета.',passive:true}
 };
 
@@ -328,7 +327,7 @@ const ABILITIES = {
 const CLASSES = {
   sniper:{name:'Снайпер',icon:'⌁',color:'#facc15',speed:6,hp:110,armor:2,stealth:70,weapons:['sniper_rifle','pistol','knife'],ability:'stealth_bonus',item:'mine',role:'Точність · маскування'},
   assault:{name:'Штурмовик',icon:'▥',color:'#f97316',speed:2,hp:220,armor:10,stealth:20,weapons:['shotgun','heavy_mg','sawed_off','iron_knuckles'],ability:'fists',item:null,role:'Броня · прорив'},
-  ranger:{name:'Рейнджер',icon:'✦',color:'#38bdf8',speed:7,hp:140,armor:5,stealth:50,weapons:['assault_rifle','pistol','bayonet'],ability:'terrain',item:'frag'+'molotov',role:'Мобільність · універсальність'},
+  ranger:{name:'Рейнджер',icon:'✦',color:'#38bdf8',speed:7,hp:140,armor:5,stealth:50,weapons:['assault_rifle','pistol','bayonet'],ability:'terrain',item:'frag',role:'Мобільність · універсальність'},
   grenadier:{name:'Гранатометчик',icon:'✹',color:'#84cc16',speed:4,hp:160,armor:7,stealth:30,weapons:['grenade_launcher','pistol','knife'],ability:'splash_stun',item:'energy',role:'Площа · оглушення'},
   medic:{name:'Медик',icon:'＋',color:'#4ade80',speed:9,hp:100,armor:3,stealth:60,weapons:['pistol','knife'],ability:'heal_revive',item:'medkit',role:'Лікування · підтримка'},
   fpv:{name:'Розвідник (FPV)',icon:'◉',color:'#a78bfa',speed:6,hp:90,armor:1,stealth:10,weapons:['assault_rifle'],ability:'drone',item:'frag',role:'Дрон · тактична інформація'},
@@ -492,7 +491,7 @@ function makeEntity(team,clsKey,x,y,isPlayer){
   return {
     id:ENTID++, team, cls:clsKey, isPlayer:!!isPlayer,
     x,y, angle:0, radius:15,
-    hp:c.hp, maxHp:c.hp, armor, baseStealth:c.stealth, mapStealthMod:map.stealthMod,
+    hp:c.hp, maxHp:c.hp, armor, baseStealth:c.stealth, mapStealthMult:map.stealthMult,
     speed:spd, weapons, weaponIdx:0, weaponKey:weapons[0], ammoState, standStill:0,
     state:'patrol', downed:false, downedAt:0, dead:false,
     abilityCd:0, itemCd:0, itemActiveT:0, speedBuffT:0,
@@ -518,7 +517,7 @@ function underDroneReveal(e){
   return RUN.entities.some(o=>o.team!==e.team && o.droneState==='active' && Math.hypot(o.droneX-e.x,o.droneY-e.y)<DRONE_RADIUS);
 }
 function effectiveStealth(e){
-  let s = e.baseStealth + e.mapStealthMod;
+  let s = e.baseStealth * e.mapStealthMult;
   if(CLASSES[e.cls].ability==='stealth_bonus' && e.standStill>1.0) s*=1.5;
   if(underDroneReveal(e)) s*=0.8;
   return clamp(s,0,140);
@@ -910,8 +909,28 @@ function updateDrone(e,dt){
   RUN.entities.forEach(t=>{
     if(t.team!==e.team && !t.dead && Math.hypot(e.droneX-t.x,e.droneY-t.y)<DRONE_RADIUS){
       t.droneReveal = Math.max(t.droneReveal,0.35);
+      t.droneReportTimer = (t.droneReportTimer||0) - dt;
+      if(!(t.droneReportTimer>0)){
+        setFuzzyReport(t,'drone');
+        t.droneReportTimer = 1.0; // оновлення "приблизної" позиції раз на секунду
+      }
     }
   });
+}
+// 1 маскування = 1px похибки (у грі 1px = RSCALE світової одиниці), для дрона похибка вдвічі менша (0.5px/маскування)
+function setFuzzyReport(e, source){
+  const err = effectiveStealth(e) * RSCALE * (source==='drone' ? 0.5 : 1.0);
+  const ang = Math.random()*Math.PI*2, rad = Math.random()*err;
+  const rx = clamp(e.x+Math.cos(ang)*rad, 0, RUN.mapSize);
+  const ry = clamp(e.y+Math.sin(ang)*rad, 0, RUN.mapSize);
+  if(source==='drone'){ e.droneReportX=rx; e.droneReportY=ry; }
+  else { e.radarReportX=rx; e.radarReportY=ry; }
+}
+// позиція, яку гра фактично показує для непроглянутого напряму бійця (пріоритет — точніший дрон)
+function reportedPos(e){
+  if(e.droneReveal>0 && e.droneReportX!=null) return {x:e.droneReportX,y:e.droneReportY};
+  if(RUN.radarActive>0 && e.radarReportX!=null) return {x:e.radarReportX,y:e.radarReportY};
+  return {x:e.x,y:e.y};
 }
 function tryItem(e){
   if(e.downed||e.dead) return;
@@ -1240,6 +1259,8 @@ function showRadarPulse(){
   el.style.opacity=1;
   setTimeout(()=>{el.style.opacity=0;},2600);
   pushLog('Супутникова розвідка: позиції ворогів оновлено.');
+  // фіксуємо приблизну (з похибкою за маскуванням) позицію кожного бійця на момент піску
+  RUN.entities.forEach(e=>{ if(!e.dead) setFuzzyReport(e,'radar'); });
 }
 
 /* ---------- РЕНДЕР ---------- */
@@ -1360,28 +1381,40 @@ function drawEntity(e){
     ctx.fillStyle='#ddd'; ctx.fillText('ПІДБИТИЙ', e.x, e.y-22);
     return;
   }
-  // видимість: показуємо ворогів лише якщо гравець їх бачить, або радар активний, або союзник
+  // видимість: показуємо ворогів лише якщо гравець їх бачить напряму, або радар/дрон активні
+  let px=e.x, py=e.y, approx=false;
   if(e.team!=='ally' && !e.isPlayer){
     const seenByPlayer = RUN.player && (canSee(RUN.player,e) && dist(RUN.player,e)<900);
     const radar = RUN.radarActive>0 || e.droneReveal>0;
     if(!seenByPlayer && !radar) return;
+    if(!seenByPlayer && radar){
+      const rp = reportedPos(e); px=rp.x; py=rp.y; approx=true;
+    }
   }
-  ctx.beginPath(); ctx.arc(e.x,e.y,e.radius,0,Math.PI*2);
-  ctx.fillStyle=color; ctx.fill();
+  if(approx){
+    ctx.strokeStyle='rgba(239,68,68,0.5)'; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.arc(px,py,e.radius+6,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+  }
+  ctx.beginPath(); ctx.arc(px,py,e.radius,0,Math.PI*2);
+  ctx.fillStyle=color; ctx.globalAlpha = approx?0.75:1; ctx.fill(); ctx.globalAlpha=1;
   ctx.strokeStyle='rgba(0,0,0,.5)'; ctx.lineWidth=2; ctx.stroke();
-  // напрям погляду
-  ctx.strokeStyle='#000'; ctx.lineWidth=3;
-  ctx.beginPath(); ctx.moveTo(e.x,e.y); ctx.lineTo(e.x+Math.cos(e.angle)*22,e.y+Math.sin(e.angle)*22); ctx.stroke();
+  // напрям погляду (лише коли позиція точна)
+  if(!approx){
+    ctx.strokeStyle='#000'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px+Math.cos(e.angle)*22,py+Math.sin(e.angle)*22); ctx.stroke();
+  }
   // іконка класу
   ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif'; ctx.textAlign='center';
-  ctx.fillText(c.icon, e.x, e.y+5);
-  // смужка hp
-  ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fillRect(e.x-18,e.y-30,36,5);
-  ctx.fillStyle= e.team==='ally'?'#3b82f6':'#ef4444';
-  ctx.fillRect(e.x-18,e.y-30, 36*(e.hp/e.maxHp), 5);
+  ctx.fillText(c.icon, px, py+5);
+  // смужка hp (лише коли позиція точна — приблизний пінг не показує стан здоров'я)
+  if(!approx){
+    ctx.fillStyle='rgba(0,0,0,.6)'; ctx.fillRect(px-18,py-30,36,5);
+    ctx.fillStyle= e.team==='ally'?'#3b82f6':'#ef4444';
+    ctx.fillRect(px-18,py-30, 36*(e.hp/e.maxHp), 5);
+  }
   if(e.isPlayer){
     ctx.strokeStyle='#a3e635'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.arc(e.x,e.y,e.radius+5,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(px,py,e.radius+5,0,Math.PI*2); ctx.stroke();
   }
 }
 function drawMinimap(){
@@ -1401,8 +1434,9 @@ function drawMinimap(){
       mctx.fillStyle = e.isPlayer?'#a3e635':'#3b82f6';
       mctx.beginPath(); mctx.arc(e.x*s,e.y*s,e.isPlayer?4:2.4,0,Math.PI*2); mctx.fill();
     } else if(RUN.radarActive>0 || e.droneReveal>0){
+      const rp = reportedPos(e);
       mctx.fillStyle='#ef4444';
-      mctx.beginPath(); mctx.arc(e.x*s,e.y*s,2.6,0,Math.PI*2); mctx.fill();
+      mctx.beginPath(); mctx.arc(rp.x*s,rp.y*s,2.6,0,Math.PI*2); mctx.fill();
     }
     if(e.droneState==='active' && (e.team==='ally' || RUN.radarActive>0)){
       mctx.fillStyle = e.team==='ally' ? '#a78bfa' : '#ef4444';
