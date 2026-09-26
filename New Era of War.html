@@ -305,7 +305,6 @@ function wRange(w){
 
 /* ---------- ДАНІ: ПРЕДМЕТИ ---------- */
 const ITEMS = {
-  molotov:{name:'Коктейль Молотова',desc:'Підпалює ворогів у радіусі 20. Кидок по курсору.',cd:10},
   mine:{name:'Міна',desc:'Ставить пастку. Вибухає під ворогом.',cd:8},
   frag:{name:'Осколкова граната',desc:'75 урону у радіусі, кидок по курсору.',cd:12},
   energy:{name:'Енергетик',desc:'+3 швидкості на 10с, +10 HP.',cd:14},
@@ -539,10 +538,23 @@ function collideCircleAt(x,y,rad,c){
   }
   return Math.hypot(x-c.x,y-c.y) < rad+c.r;
 }
+function coverHitAt(x,y){
+  if(!RUN.covers) return null;
+  for(const c of RUN.covers){ if(c.blocksLOS && collideCircleAt(x,y,3,c)) return c; }
+  return null;
+}
 function blockedAt(x,y){
-  if(!RUN.covers) return false;
-  for(const c of RUN.covers){ if(c.blocksLOS && collideCircleAt(x,y,3,c)) return true; }
-  return false;
+  return !!coverHitAt(x,y);
+}
+function damageCover(c,dmg){
+  if(!c || !c.breakable || dmg<=0) return;
+  c.hp -= dmg;
+  if(c.hp<=0){
+    const idx = RUN.covers.indexOf(c);
+    if(idx>=0) RUN.covers.splice(idx,1);
+    spawnParticle(c.x,c.y,'#e9e9e3',(c.r||Math.max(c.w||0,c.h||0)/2)||30);
+    pushLog('Стіну зруйновано вогнем.');
+  }
 }
 function segmentBlocked(a,b){
   if(!RUN.covers || !RUN.covers.length) return false;
@@ -602,6 +614,16 @@ function buildMapLayout(mapKey, ms, seed, allyBase, enemyBase, cap, capR){
       if(!clearOfBases(cx,cy,50) || !clearOfCap(cx,cy,60)) continue;
       const w = cell*rand(0.4,0.62), h = cell*rand(0.4,0.62);
       covers.push({x:cx,y:cy,w,h,shape:'rect',solid:true,blocksLOS:true,fill:'#3a3a35',stroke:'#54544c'});
+    }
+    // руйновані стіни (білі) — окремі барикади, які можна пробити сумарно 30 уроном
+    const wallCount = Math.max(6, Math.floor(ms/450));
+    for(let i=0;i<wallCount;i++){
+      const x=rng()*ms, y=rng()*ms;
+      if(!clearOfBases(x,y,40) || !clearOfCap(x,y,50)) continue;
+      const horizontal = rng()<0.5;
+      const w = horizontal ? rand(90,170) : rand(16,24);
+      const h = horizontal ? rand(16,24) : rand(90,170);
+      covers.push({x,y,w,h,shape:'rect',solid:true,blocksLOS:true,breakable:true,hp:30,maxHp:30,fill:'#e9e9e3',stroke:'#ffffff',isWall:true});
     }
   } else if(mapKey==='desert'){
     // скельні виходи та піщані дюни, розкидані рідше — відкриті прострільні коридори
@@ -973,8 +995,11 @@ function updateBullets(dt){
     const r = wRange(w);
     if(r.maxR && b.traveled > r.maxR*1.08 + 20){ b.alive=false; return; }
     // укриття блокує лінію пострілу
-    if(blockedAt(b.x,b.y)){
+    const hitCover = coverHitAt(b.x,b.y);
+    if(hitCover){
       b.alive=false;
+      const hitDmg = w.dmgMax!==undefined ? w.dmgMax : w.dmg;
+      damageCover(hitCover, hitDmg);
       if(w.splash) explode(b.x,b.y,w.splash,w.dmg*0.6,b.team,false);
       spawnParticle(b.x,b.y,'#8a8a80',10);
       return;
@@ -1013,6 +1038,14 @@ function explode(x,y,radius,dmg,team,stun){
       if(stun && t.team!==team){ t.stunT=Math.max(t.stunT||0,1.0); }
     }
   });
+  if(RUN.covers){
+    RUN.covers.slice().forEach(c=>{
+      if(!c.breakable) return;
+      const rad = c.r || Math.max(c.w||0,c.h||0)/2;
+      const d = Math.hypot(x-c.x,y-c.y);
+      if(d < radius+rad){ damageCover(c, dmg*(1-Math.min(0.7,d/(radius+rad))*0.5)); }
+    });
+  }
 }
 function spawnParticle(x,y,color,r){
   RUN.particles.push({x,y,color,r:r||30,t:0,life:0.4});
@@ -1291,11 +1324,27 @@ function render(){
   });
   // укриття (будівлі/скелі/кущі/крижані брили — блокують рух і постріли)
   RUN.covers.forEach(c=>{
-    ctx.fillStyle=c.fill||'rgba(90,80,60,0.55)'; ctx.strokeStyle=c.stroke||'rgba(214,168,79,0.35)'; ctx.lineWidth=1.5;
+    const dmgFrac = c.breakable ? clamp(1-(c.hp/c.maxHp),0,1) : 0;
+    ctx.fillStyle=c.fill||'rgba(90,80,60,0.55)';
+    ctx.globalAlpha = c.breakable ? (1-dmgFrac*0.55) : 1;
+    ctx.strokeStyle=c.stroke||'rgba(214,168,79,0.35)'; ctx.lineWidth=1.5;
     ctx.beginPath();
     if(c.shape==='rect'){ ctx.rect(c.x-c.w/2,c.y-c.h/2,c.w,c.h); }
     else { ctx.arc(c.x,c.y,c.r,0,Math.PI*2); }
     ctx.fill(); ctx.stroke();
+    ctx.globalAlpha=1;
+    if(c.breakable && dmgFrac>0){
+      // тріщини — детерміновані (не мерехтять), кількість росте з пошкодженням
+      ctx.strokeStyle='rgba(80,80,74,0.8)'; ctx.lineWidth=1;
+      const hw=(c.w||30)/2, hh=(c.h||30)/2, cracks=Math.ceil(dmgFrac*4);
+      const pr = n=>{ const v=Math.sin((c.x*12.9898+c.y*78.233+n*37.719))*43758.5453; return v-Math.floor(v); };
+      for(let i=0;i<cracks;i++){
+        ctx.beginPath();
+        ctx.moveTo(c.x-hw+pr(i*4)*hw*0.6+2, c.y-hh+pr(i*4+1)*hh*0.4+2);
+        ctx.lineTo(c.x-hw+hw*0.4+pr(i*4+2)*hw*1.4, c.y-hh+hh*0.6+pr(i*4+3)*hh*1.2);
+        ctx.stroke();
+      }
+    }
   });
 
   // бази
