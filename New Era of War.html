@@ -196,6 +196,7 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
       <h2 class="heading" id="hudClassName" style="font-size:1.4rem;margin:2px 0 10px;">—</h2>
       <div class="hpbar"><i id="hpFill" style="width:100%;"></i></div>
       <div style="display:flex;justify-content:space-between;font-size:.68rem;margin-top:5px;"><span>ЗДОРОВ'Я</span><span id="hpText">0/0</span></div>
+      <div id="bushStatus" style="display:none;margin-top:6px;font-size:.65rem;color:var(--primary);background:rgba(163,230,53,.1);border:1px solid var(--primary);border-radius:5px;padding:4px 8px;text-align:center;">🌿 У кущі — приховані від радара/дрона</div>
 
       <div class="hud-grid" style="margin-top:16px;">
         <div class="hud-stat"><b id="statSpeed">0</b><br><span class="muted">ШВИДКІСТЬ</span></div>
@@ -468,6 +469,14 @@ const SND = {
 /* ---------- ДОПОМІЖНІ ФУНКЦІЇ ---------- */
 function rand(a,b){return a+Math.random()*(b-a);}
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function pointNearSegment(px,py,x0,y0,x1,y1,rad){
+  const dx=x1-x0, dy=y1-y0;
+  const len2=dx*dx+dy*dy;
+  let t = len2>0 ? ((px-x0)*dx+(py-y0)*dy)/len2 : 0;
+  t = clamp(t,0,1);
+  const cx=x0+dx*t, cy=y0+dy*t;
+  return Math.hypot(px-cx,py-cy) < rad;
+}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 function seededRng(seed){ let s=seed%2147483647; if(s<=0)s+=2147483646;
   return function(){ s=(s*16807)%2147483647; return (s-1)/2147483646; }; }
@@ -495,7 +504,7 @@ function makeEntity(team,clsKey,x,y,isPlayer){
     state:'patrol', downed:false, downedAt:0, dead:false,
     abilityCd:0, itemCd:0, itemActiveT:0, speedBuffT:0,
     patrolTarget:null, kills:0,
-    droneReveal:0, droneState:'idle', droneTimer:0, droneX:0, droneY:0, droneHoldTimer:0
+    droneReveal:0, droneState:'idle', droneTimer:0, droneX:0, droneY:0, droneHoldTimer:0, exposedTimer:0
   };
 }
 function switchWeapon(e, dir){
@@ -514,6 +523,12 @@ const DRONE_LEASH = 50*RSCALE;
 const DRONE_SPEED = 5*SPD;
 function underDroneReveal(e){
   return RUN.entities.some(o=>o.team!==e.team && o.droneState==='active' && Math.hypot(o.droneX-e.x,o.droneY-e.y)<DRONE_RADIUS);
+}
+// у кущі й не стріляв останні 3с — радар/дрон/мінікарта його не видають
+function isBushHidden(e){
+  if(e.exposedTimer>0) return false;
+  if(!RUN.covers) return false;
+  return RUN.covers.some(c=>c.isBush && Math.hypot(e.x-c.x,e.y-c.y)<c.r);
 }
 function effectiveStealth(e){
   let s = e.baseStealth * e.mapStealthMult;
@@ -543,8 +558,25 @@ function coverHitAt(x,y){
   for(const c of RUN.covers){ if(c.blocksLOS && collideCircleAt(x,y,3,c)) return c; }
   return null;
 }
+// перевіряє ввесь пройдений за кадр відрізок (не лише кінцеву точку) — інакше швидкі кулі
+// можуть "проскочити" крізь невеликі перешкоди (кущі) між двома кадрами
+function coverHitOnSegment(x0,y0,x1,y1,rad){
+  if(!RUN.covers || !RUN.covers.length) return null;
+  const segLen = Math.hypot(x1-x0,y1-y0);
+  const steps = Math.max(1, Math.ceil(segLen/6));
+  for(let i=0;i<=steps;i++){
+    const t=i/steps;
+    const x=x0+(x1-x0)*t, y=y0+(y1-y0)*t;
+    const c = coverHitAt(x,y);
+    if(c) return c;
+  }
+  return null;
+}
+// блокування ЗОРУ (для куль використовується coverHitAt): прозорі стіни зір не блокують
 function blockedAt(x,y){
-  return !!coverHitAt(x,y);
+  if(!RUN.covers) return false;
+  for(const c of RUN.covers){ if(c.blocksLOS && !c.seeThrough && collideCircleAt(x,y,3,c)) return true; }
+  return false;
 }
 function damageCover(c,dmg){
   if(!c || !c.breakable || dmg<=0) return;
@@ -575,6 +607,7 @@ function nearestCover(x,y,maxDist){
   if(!RUN.covers) return null;
   let best=null,bd=maxDist;
   RUN.covers.forEach(c=>{
+    if(c.isBush) return; // кущі не блокують кулі — укриттям для ботів не є
     const d=Math.hypot(x-c.x,y-c.y);
     if(d<bd){ bd=d; best=c; }
   });
@@ -636,16 +669,29 @@ function buildMapLayout(mapKey, ms, seed, allyBase, enemyBase, cap, capR){
         covers.push({x:x+rand(-40,40),y:y+rand(-40,40),r:rand(22,48),shape:'circle',solid:true,blocksLOS:true,fill:'#8a5a2e',stroke:'#c2793e'});
       }
     }
+    // сухі чагарники, в яких можна ховатись (кулі проходять крізь них)
+    const bushCount = Math.max(7,Math.floor(ms/280));
+    for(let i=0;i<bushCount;i++){
+      const x=rng()*ms, y=rng()*ms;
+      if(!clearOfBases(x,y,30) || !clearOfCap(x,y,40)) continue;
+      covers.push({x,y,r:rand(24,36),shape:'circle',solid:false,blocksLOS:false,isBush:true,fill:'#6b6a34',stroke:'#a09a52'});
+    }
     for(let i=0;i<Math.max(2,Math.floor(ms/900));i++){
       swamps.push({x:rng()*ms,y:rng()*ms,r:rand(140,240),fill:'rgba(230,190,120,0.18)'});
     }
   } else if(mapKey==='field'){
-    // відкрите поле: рідкі кущі/дерева, кілька заболочених ділянок
-    const n = Math.max(10,Math.floor(ms/260));
+    // відкрите поле: рідкі дерева (суцільне укриття) + кущі, в яких можна ховатись
+    const n = Math.max(7,Math.floor(ms/340));
     for(let i=0;i<n;i++){
       const x=rng()*ms, y=rng()*ms;
       if(!clearOfBases(x,y,30) || !clearOfCap(x,y,40)) continue;
-      covers.push({x,y,r:rand(13,24),shape:'circle',solid:true,blocksLOS:true,fill:'#3f5f28',stroke:'#5c8a3a'});
+      covers.push({x,y,r:rand(13,20),shape:'circle',solid:true,blocksLOS:true,fill:'#3f5f28',stroke:'#5c8a3a'});
+    }
+    const bushCount = Math.max(8,Math.floor(ms/240));
+    for(let i=0;i<bushCount;i++){
+      const x=rng()*ms, y=rng()*ms;
+      if(!clearOfBases(x,y,30) || !clearOfCap(x,y,40)) continue;
+      covers.push({x,y,r:rand(24,36),shape:'circle',solid:false,blocksLOS:false,isBush:true,fill:'#33552a',stroke:'#5c8a3a'});
     }
     for(let i=0;i<Math.max(2,Math.floor(ms/950));i++){
       swamps.push({x:rng()*ms,y:rng()*ms,r:rand(90,170),fill:'rgba(90,110,60,0.28)'});
@@ -657,6 +703,16 @@ function buildMapLayout(mapKey, ms, seed, allyBase, enemyBase, cap, capR){
       const x=rng()*ms, y=rng()*ms;
       if(!clearOfBases(x,y,40) || !clearOfCap(x,y,50)) continue;
       covers.push({x,y,r:rand(18,36),shape:'circle',solid:true,blocksLOS:true,fill:'#324352',stroke:'#5b7a8c'});
+    }
+    // крижані стіни: ламаються сумарним уроном 30, блокують рух і кулі, але крізь них видно ворога
+    const iceWalls = Math.max(6, Math.floor(ms/450));
+    for(let i=0;i<iceWalls;i++){
+      const x=rng()*ms, y=rng()*ms;
+      if(!clearOfBases(x,y,40) || !clearOfCap(x,y,50)) continue;
+      const horizontal = rng()<0.5;
+      const w = horizontal ? rand(90,170) : rand(16,24);
+      const h = horizontal ? rand(16,24) : rand(90,170);
+      covers.push({x,y,w,h,shape:'rect',solid:true,blocksLOS:true,seeThrough:true,breakable:true,hp:30,maxHp:30,fill:'rgba(150,215,245,0.6)',stroke:'#e6f8ff',isWall:true});
     }
     const lakeCount = Math.max(1,Math.floor(ms/1400));
     for(let i=0;i<lakeCount;i++){
@@ -816,6 +872,7 @@ function updateCommon(e,dt){
   if(e.speedBuffT>0) e.speedBuffT-=dt;
   if(e.droneReveal>0) e.droneReveal-=dt;
   if(e.stunT>0) e.stunT-=dt;
+  if(e.exposedTimer>0) e.exposedTimer-=dt;
 
   if(e.downed){
     e.downedAt+=dt;
@@ -835,6 +892,7 @@ function tryShoot(e){
     st.shotT = w.shotCd||0.5;
     meleeAttack(e, w.dmg, w.maxR);
     SND.shot();
+    e.exposedTimer = 3.0;
     return;
   }
 
@@ -845,13 +903,15 @@ function tryShoot(e){
     return;
   }
   st.mag--; st.shotT=w.shotCd;
+  e.exposedTimer = 3.0;
   const pellets = w.pellets||1;
   for(let i=0;i<pellets;i++){
     let ang = e.angle;
     if(w.spreadDeg){ ang += (rand(-1,1)) * (w.spreadDeg*Math.PI/180); }
     else if(w.mag>10){ ang += rand(-1,1)*0.03; }
+    const sx=e.x+Math.cos(e.angle)*e.radius, sy=e.y+Math.sin(e.angle)*e.radius;
     RUN.bullets.push({
-      x:e.x+Math.cos(e.angle)*e.radius, y:e.y+Math.sin(e.angle)*e.radius,
+      x:sx, y:sy, prevX:sx, prevY:sy,
       dx:Math.cos(ang), dy:Math.sin(ang), spd:w.bSpeed, team:e.team, owner:e,
       weaponKey:e.weaponKey, traveled:0, alive:true
     });
@@ -965,7 +1025,7 @@ function tryItem(e){
     if(e.isPlayer) toast('Міну встановлено');
   } else if(itemKey==='frag'){
     const wx=e.x+Math.cos(e.angle)*260, wy=e.y+Math.sin(e.angle)*260;
-    RUN.bullets.push({x:e.x,y:e.y,dx:(wx-e.x)/260,dy:(wy-e.y)/260,spd:520,team:e.team,owner:e,weaponKey:'__frag',traveled:0,alive:true,life:260/520});
+    RUN.bullets.push({x:e.x,y:e.y,prevX:e.x,prevY:e.y,dx:(wx-e.x)/260,dy:(wy-e.y)/260,spd:520,team:e.team,owner:e,weaponKey:'__frag',traveled:0,alive:true,life:260/520});
     if(e.isPlayer) toast('Граната кинута');
   } else if(itemKey==='energy'){
     e.speedBuffT=10; e.hp=Math.min(e.maxHp,e.hp+10);
@@ -983,6 +1043,7 @@ function tryItem(e){
 function updateBullets(dt){
   RUN.bullets.forEach(b=>{
     if(!b.alive) return;
+    const px=b.x, py=b.y;
     const step = b.spd*dt;
     b.x+=b.dx*step; b.y+=b.dy*step; b.traveled+=step;
     if(b.x<0||b.x>RUN.mapSize||b.y<0||b.y>RUN.mapSize){ b.alive=false; return; }
@@ -994,8 +1055,8 @@ function updateBullets(dt){
     const w = WEAPONS[b.weaponKey];
     const r = wRange(w);
     if(r.maxR && b.traveled > r.maxR*1.08 + 20){ b.alive=false; return; }
-    // укриття блокує лінію пострілу
-    const hitCover = coverHitAt(b.x,b.y);
+    // укриття блокує лінію пострілу — перевіряємо весь відрізок цього кадру, не лише кінцеву точку
+    const hitCover = coverHitOnSegment(px,py,b.x,b.y,3);
     if(hitCover){
       b.alive=false;
       const hitDmg = w.dmgMax!==undefined ? w.dmgMax : w.dmg;
@@ -1004,11 +1065,11 @@ function updateBullets(dt){
       spawnParticle(b.x,b.y,'#8a8a80',10);
       return;
     }
-    // перевірка попадання
+    // перевірка попадання (по всьому відрізку кадру, не лише кінцевій точці)
     let hit=null;
     RUN.entities.forEach(t=>{
       if(hit||t.dead||t.team===b.team||t.downed) return;
-      if(dist(b,t)<t.radius+4) hit=t;
+      if(pointNearSegment(t.x,t.y,px,py,b.x,b.y,t.radius+4)) hit=t;
     });
     if(hit){
       b.alive=false;
@@ -1434,7 +1495,7 @@ function drawEntity(e){
   let px=e.x, py=e.y, approx=false;
   if(e.team!=='ally' && !e.isPlayer){
     const seenByPlayer = RUN.player && (canSee(RUN.player,e) && dist(RUN.player,e)<900);
-    const radar = RUN.radarActive>0 || e.droneReveal>0;
+    const radar = (RUN.radarActive>0 || e.droneReveal>0) && !isBushHidden(e);
     if(!seenByPlayer && !radar) return;
     if(!seenByPlayer && radar){
       const rp = reportedPos(e); px=rp.x; py=rp.y; approx=true;
@@ -1482,7 +1543,7 @@ function drawMinimap(){
     if(e.team==='ally'){
       mctx.fillStyle = e.isPlayer?'#a3e635':'#3b82f6';
       mctx.beginPath(); mctx.arc(e.x*s,e.y*s,e.isPlayer?4:2.4,0,Math.PI*2); mctx.fill();
-    } else if(RUN.radarActive>0 || e.droneReveal>0){
+    } else if((RUN.radarActive>0 || e.droneReveal>0) && !isBushHidden(e)){
       const rp = reportedPos(e);
       mctx.fillStyle='#ef4444';
       mctx.beginPath(); mctx.arc(rp.x*s,rp.y*s,2.6,0,Math.PI*2); mctx.fill();
@@ -1500,6 +1561,7 @@ function updateHUD(){
   document.getElementById('hudClassName').textContent = CLASSES[p.cls].icon+' '+CLASSES[p.cls].name;
   document.getElementById('hpFill').style.width = Math.max(0,(p.hp/p.maxHp*100))+'%';
   document.getElementById('hpText').textContent = Math.max(0,Math.round(p.hp))+'/'+p.maxHp;
+  document.getElementById('bushStatus').style.display = isBushHidden(p) ? 'block' : 'none';
   document.getElementById('statSpeed').textContent = Math.round(p.speed/SPD);
   document.getElementById('statStealth').textContent = Math.round(effectiveStealth(p));
   document.getElementById('statArmor').textContent = p.armor;
