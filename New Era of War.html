@@ -19,6 +19,11 @@
   --radius:8px;
 }
 *{box-sizing:border-box;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.friend-row{display:flex;align-items:center;gap:8px;font-size:.78rem;padding:6px 8px;background:rgba(0,0,0,.25);border-radius:6px;}
+.friend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+#classTimerBox{display:none;align-items:center;gap:10px;justify-content:center;margin-bottom:18px;}
+#classTimerNum{font-size:1.6rem;font-weight:900;color:var(--primary);min-width:44px;text-align:center;}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;overflow:hidden;}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.06;background-image:radial-gradient(#fff .6px,transparent .6px);background-size:5px 5px;z-index:50;}
 .heading{letter-spacing:.06em;text-transform:uppercase;font-weight:900;}
@@ -96,10 +101,12 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
         <h1 class="heading" style="font-size:4.4rem;line-height:.86;margin:0;">New<br><span style="color:var(--primary);">Era</span><br>of War</h1>
         <p class="muted" style="max-width:480px;margin-top:26px;font-size:1.05rem;line-height:1.6;">Тактичний командний шутер зверху. Обери спеціаліста, керуй загоном з 10 бійців та захопи центральну точку раніше за ворога.</p>
         <div style="margin-top:34px;display:flex;flex-wrap:wrap;gap:14px;">
-          <button class="btn btn-primary" onclick="goto_('map')">Почати гру →</button>
+          <button class="btn btn-primary" onclick="DIFFICULTY=DIFFICULTIES.sergeant; goto_('connecting')">🟢 Онлайн →</button>
+          <button class="btn btn-ghost" onclick="VIA_ONLINE=false; goto_('difficulty')">Офлайн (проти ботів)</button>
           <button class="btn btn-ghost" onclick="goto_('details')">Деталі гри</button>
           <button class="btn btn-ghost" onclick="goto_('settings')">Налаштування</button>
         </div>
+        <p class="muted" style="font-size:.68rem;margin-top:14px;max-width:480px;">Онлайн — це імітація підбору гравців: реальних суперників тут немає, бій завжди йде проти тактичних ботів, але з повним циклом лобі/пошуку/статистики.</p>
       </section>
       <section class="panel" style="padding:28px;position:relative;">
         <div style="position:absolute;top:0;right:0;padding:8px 12px;font-size:9px;letter-spacing:.2em;color:var(--primary);border-left:1px solid var(--gold);border-bottom:1px solid var(--gold);">LIVE BRIEFING</div>
@@ -116,6 +123,105 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
         </div>
       </section>
     </div>
+  </main>
+</section>
+
+<!-- =============== OFFLINE: DIFFICULTY SELECT =============== -->
+<section id="screen-difficulty" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button><button class="btn btn-ghost" onclick="goto_('menu')">← Меню</button></div></header>
+  <main class="wrap" style="padding:60px 22px;max-width:920px;">
+    <div class="step">ОФЛАЙН // ПРОТИ БОТІВ</div>
+    <h1 class="heading" style="font-size:2.6rem;margin:0 0 8px;">Оберіть складність</h1>
+    <p class="muted" style="margin-bottom:30px;">Впливає на здоров'я, точність, дальність виявлення та частоту вогню ворожих ботів.</p>
+    <div class="grid3" id="difficultyGrid"></div>
+  </main>
+</section>
+
+<!-- =============== ONLINE: CONNECTING =============== -->
+<section id="screen-connecting" class="screen grid-bg" style="min-height:100vh;">
+  <main class="wrap" style="padding:0 22px;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+    <div class="spinner" style="width:54px;height:54px;border-radius:50%;border:3px solid rgba(163,230,53,.2);border-top-color:var(--primary);animation:spin 1s linear infinite;"></div>
+    <h2 class="heading" style="margin-top:22px;font-size:1.3rem;">Підключення до сервера...</h2>
+    <p class="muted" style="font-size:.78rem;margin-top:6px;">Авторизація · синхронізація профілю</p>
+  </main>
+</section>
+
+<!-- =============== ONLINE: LOBBY =============== -->
+<section id="screen-lobby" class="screen grid-bg" style="min-height:100vh;">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;align-items:center;">
+    <button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button>
+    <button id="profileBtn" onclick="goto_('stats')" style="display:flex;align-items:center;gap:10px;background:none;border:1px solid var(--gold);border-radius:20px;padding:6px 14px 6px 6px;cursor:pointer;color:var(--text);font-family:inherit;">
+      <span style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#04140a;display:flex;align-items:center;justify-content:center;font-weight:900;">B</span>
+      <span style="font-size:.78rem;text-align:left;"><b>Боєць</b><br><span class="muted" id="lobbyWinrate" style="font-size:.65rem;">0% перемог</span></span>
+    </button>
+  </div></header>
+  <main class="wrap" style="padding:40px 22px;">
+    <div style="display:grid;grid-template-columns:1fr;gap:24px;" class="grid2">
+      <section>
+        <div class="step">ЛОБІ</div>
+        <h1 class="heading" style="font-size:2.2rem;margin:0 0 22px;">Найчастіше зіграний спеціаліст</h1>
+        <div class="panel" id="favClassCard" style="padding:26px;display:flex;gap:20px;align-items:center;"></div>
+        <div style="text-align:center;margin-top:34px;">
+          <button class="btn btn-primary" style="font-size:1rem;padding:1.1rem 2.4rem;" onclick="goto_('searching')">⚔ Почати бій</button>
+        </div>
+      </section>
+      <aside class="panel" style="padding:22px;">
+        <div class="step">ДРУЗІ</div>
+        <div id="friendsList" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:260px;overflow-y:auto;"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <input id="friendNameInput" placeholder="Ім'я друга" style="flex:1;background:rgba(0,0,0,.3);border:1px solid var(--gold);border-radius:6px;padding:8px 10px;color:var(--text);font-family:inherit;font-size:.78rem;">
+          <button class="btn btn-ghost" style="padding:.6rem 1rem;" onclick="addFriend()">+</button>
+        </div>
+        <p class="muted" style="font-size:.6rem;margin-top:10px;">Локальний список у цьому браузері — реальних акаунтів немає.</p>
+      </aside>
+    </div>
+  </main>
+</section>
+
+<!-- =============== PROFILE STATS =============== -->
+<section id="screen-stats" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('lobby')">NEW ERA <span>OF WAR</span></button><button class="btn btn-ghost" onclick="goto_('lobby')">← Лобі</button></div></header>
+  <main class="wrap" style="padding:40px 22px 90px;">
+    <div class="step">ПРОФІЛЬ</div>
+    <h1 class="heading" style="font-size:2.4rem;margin:0 0 22px;">Статистика</h1>
+    <div class="grid3" style="margin-bottom:22px;">
+      <div class="panel" style="padding:20px;text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--primary);" id="statMatches">0</div><div class="muted" style="font-size:.7rem;">БОЇВ ЗІГРАНО</div></div>
+      <div class="panel" style="padding:20px;text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--primary);" id="statWinrate">0%</div><div class="muted" style="font-size:.7rem;">WIN RATE</div></div>
+      <div class="panel" style="padding:20px;text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--primary);" id="statMvp">0</div><div class="muted" style="font-size:.7rem;">MVP БОЇВ</div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel" style="padding:22px;">
+        <div class="step">ЗАГАЛЬНІ ПОКАЗНИКИ</div>
+        <div id="statList" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.8rem;margin-top:10px;"></div>
+        <div class="step" style="margin-top:22px;">ЗА КЛАСАМИ</div>
+        <div id="statByClass" style="margin-top:10px;font-size:.76rem;"></div>
+      </div>
+      <div class="panel" style="padding:22px;display:flex;flex-direction:column;align-items:center;">
+        <div class="step" style="align-self:flex-start;">ПРОФІЛЬ БІЙЦЯ</div>
+        <canvas id="radarChart" width="320" height="300" style="margin-top:10px;max-width:100%;"></canvas>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- =============== SEARCHING FOR PLAYERS =============== -->
+<section id="screen-searching" class="screen grid-bg" style="min-height:100vh;">
+  <main class="wrap" style="padding:0 22px;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+    <div class="spinner" style="width:54px;height:54px;border-radius:50%;border:3px solid rgba(163,230,53,.2);border-top-color:var(--primary);animation:spin 1s linear infinite;"></div>
+    <h2 class="heading" style="margin-top:22px;font-size:1.3rem;">Пошук гравців...</h2>
+    <p class="muted" style="font-size:.78rem;margin:6px 0 20px;" id="searchCount">0 / 20 знайдено</p>
+    <div id="searchGrid" style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px;max-width:420px;"></div>
+  </main>
+</section>
+
+<!-- =============== MAP REVEAL =============== -->
+<section id="screen-mapreveal" class="screen grid-bg" style="min-height:100vh;">
+  <main class="wrap" style="padding:0 22px;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+    <div class="step">МАТЧ ЗНАЙДЕНО</div>
+    <div id="revealIcon" style="font-size:4rem;margin:10px 0;"></div>
+    <h1 class="heading" id="revealMapName" style="font-size:2.6rem;margin:0;">—</h1>
+    <p class="muted" id="revealSizeInfo" style="margin-top:8px;"></p>
+    <p class="muted" style="font-size:.7rem;margin-top:26px;">Карту й розмір гра обирає випадково</p>
   </main>
 </section>
 
@@ -148,6 +254,7 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
   <main class="wrap" style="padding:50px 22px 90px;">
     <div class="step">КРОК 03 / 03</div>
     <h1 class="heading" style="font-size:2.6rem;margin:0 0 20px;">Оберіть спеціаліста</h1>
+    <div id="classTimerBox"><span class="muted" id="classTimerLabel" style="font-size:.85rem;">⏱ Час на вибір:</span><span id="classTimerNum">30</span></div>
     <div class="grid-cls" id="classGrid"></div>
   </main>
 </section>
@@ -246,7 +353,7 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
     <p class="muted" id="endSub" style="font-size:1.05rem;"></p>
     <div id="endStats" class="panel" style="max-width:520px;margin:24px auto 0;padding:24px;text-align:left;"></div>
     <div style="margin-top:30px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="goto_('map')">Нова операція</button>
+      <button class="btn btn-primary" id="endPrimaryBtn" onclick="goto_('map')">Нова операція</button>
       <button class="btn btn-ghost" onclick="goto_('menu')">Головне меню</button>
     </div>
   </main>
@@ -264,6 +371,18 @@ function goto_(name){
   document.getElementById('screen-'+name).classList.add('active');
   if(name==='battle'){ resizeCanvas(); }
   if(RUN.active && name!=='battle'){ stopMatch(false); }
+  if(name!=='class'){ stopClassTimer(); }
+  if(name==='connecting'){
+    setTimeout(()=>{ if(document.getElementById('screen-connecting').classList.contains('active')) goto_('lobby'); }, 1700);
+  } else if(name==='lobby'){
+    renderLobby();
+  } else if(name==='stats'){
+    renderStats();
+  } else if(name==='searching'){
+    runSearchingAnimation();
+  } else if(name==='mapreveal'){
+    runMapReveal();
+  }
 }
 
 /* ---------- ДАНІ: КАРТИ ---------- */
@@ -337,8 +456,207 @@ const CLASS_ORDER = ['sniper','assault','ranger','grenadier','medic','fpv','mort
 // Склад команди 10 бійців: 0-1 снайпер,0-1 fpv,0-1 медик,0-1 мінометник,0-2 гранатометчик,0-2 штурмовик,3-5 рейнджер
 const TEAM_COMPOSITION = ['sniper','fpv','medic','mortarman','grenadier','assault','ranger','ranger','ranger','ranger'];
 
+/* ---------- ЛОКАЛЬНА СТАТИСТИКА / ДРУЗІ (немає сервера — все зберігається в цьому браузері) ---------- */
+const LS_STATS = 'neow_stats_v1', LS_FRIENDS = 'neow_friends_v1';
+function loadStats(){
+  try{ const raw = localStorage.getItem(LS_STATS); if(raw) return JSON.parse(raw); }catch(e){}
+  return {matches:0,wins:0,losses:0,mvp:0,curStreak:0,bestStreak:0,totalKills:0,bestKills:0,totalDamage:0,survived:0,byClass:{}};
+}
+function saveStats(){ try{ localStorage.setItem(LS_STATS, JSON.stringify(STATS)); }catch(e){} }
+let STATS = loadStats();
+function loadFriends(){
+  try{ const raw = localStorage.getItem(LS_FRIENDS); if(raw) return JSON.parse(raw); }catch(e){}
+  return [{name:'Shadow_Wolf',online:true},{name:'Nika',online:false},{name:'Rex_UA',online:true}];
+}
+function saveFriends(){ try{ localStorage.setItem(LS_FRIENDS, JSON.stringify(FRIENDS)); }catch(e){} }
+let FRIENDS = loadFriends();
+function addFriend(){
+  const inp = document.getElementById('friendNameInput');
+  const name = (inp.value||'').trim();
+  if(!name) return;
+  FRIENDS.push({name, online: Math.random()<0.5});
+  saveFriends();
+  inp.value='';
+  renderLobby();
+}
+function recordMatchStats(winnerTeam){
+  const p = RUN.player; if(!p) return;
+  const won = winnerTeam==='ally';
+  STATS.matches++;
+  if(won){ STATS.wins++; STATS.curStreak++; STATS.bestStreak=Math.max(STATS.bestStreak,STATS.curStreak); }
+  else if(winnerTeam==='enemy'){ STATS.losses++; STATS.curStreak=0; }
+  else { STATS.curStreak=0; }
+  const kills = p.kills||0;
+  STATS.totalKills += kills;
+  STATS.bestKills = Math.max(STATS.bestKills, kills);
+  STATS.totalDamage += Math.round(p.damageDealt||0);
+  if(!p.dead) STATS.survived++;
+  const cls = RUN.playerCls;
+  if(!STATS.byClass[cls]) STATS.byClass[cls]={played:0,wins:0,kills:0};
+  STATS.byClass[cls].played++;
+  if(won) STATS.byClass[cls].wins++;
+  STATS.byClass[cls].kills += kills;
+  const allyKillsMax = Math.max(0,...RUN.entities.filter(e=>e.team==='ally').map(e=>e.kills||0));
+  if(kills>0 && kills>=allyKillsMax) STATS.mvp++;
+  saveStats();
+}
+function favoriteClass(){
+  let best=null,bestN=-1;
+  Object.keys(STATS.byClass).forEach(k=>{ if(STATS.byClass[k].played>bestN){ bestN=STATS.byClass[k].played; best=k; } });
+  return best;
+}
+function renderLobby(){
+  const wr = STATS.matches? Math.round(STATS.wins/STATS.matches*100):0;
+  document.getElementById('lobbyWinrate').textContent = wr+'% перемог · '+STATS.matches+' боїв';
+  const favKey = favoriteClass();
+  const card = document.getElementById('favClassCard');
+  if(!favKey){
+    card.innerHTML = `<div class="muted">Ще немає зіграних боїв — оберіть будь-кого у своєму першому матчі.</div>`;
+  } else {
+    const c = CLASSES[favKey], st = STATS.byClass[favKey];
+    card.innerHTML = `<span style="font-size:3rem;color:${c.color};">${c.icon}</span>
+      <div><h2 class="heading" style="margin:0;">${c.name}</h2>
+      <p class="muted" style="margin:4px 0 0;">${st.played} боїв · ${st.played?Math.round(st.wins/st.played*100):0}% перемог · ${st.kills} ураження</p></div>`;
+  }
+  const list = document.getElementById('friendsList');
+  list.innerHTML = FRIENDS.map(f=>`<div class="friend-row"><span class="friend-dot" style="background:${f.online?'#4ade80':'#6b7280'};"></span>${f.name}<span class="muted" style="margin-left:auto;font-size:.65rem;">${f.online?'у мережі':'офлайн'}</span></div>`).join('') || '<p class="muted">Список друзів порожній.</p>';
+}
+function renderStats(){
+  document.getElementById('statMatches').textContent = STATS.matches;
+  document.getElementById('statWinrate').textContent = (STATS.matches?Math.round(STATS.wins/STATS.matches*100):0)+'%';
+  document.getElementById('statMvp').textContent = STATS.mvp;
+  const rows = [
+    ['Перемог', STATS.wins], ['Поразок', STATS.losses],
+    ['Найкраща серія перемог', STATS.bestStreak], ['Поточна серія', STATS.curStreak],
+    ['Усього уражень', STATS.totalKills], ['Найбільше уражень за бій', STATS.bestKills],
+    ['Завдано шкоди (сумарно)', STATS.totalDamage], ['Вижив у боях', STATS.survived]
+  ];
+  document.getElementById('statList').innerHTML = rows.map(r=>`<div class="muted">${r[0]}</div><div style="text-align:right;font-weight:700;">${r[1]}</div>`).join('');
+  const byClassKeys = Object.keys(STATS.byClass);
+  document.getElementById('statByClass').innerHTML = byClassKeys.length ? byClassKeys.map(k=>{
+    const c=CLASSES[k], st=STATS.byClass[k];
+    return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06);"><span>${c.icon} ${c.name}</span><span class="muted">${st.played} боїв · ${st.played?Math.round(st.wins/st.played*100):0}% W · ${st.kills} kills</span></div>`;
+  }).join('') : '<p class="muted">Немає даних.</p>';
+  drawRadarChart();
+}
+function drawRadarChart(){
+  const cv = document.getElementById('radarChart'); if(!cv) return;
+  const rctx = cv.getContext('2d');
+  const cx=cv.width/2, cy=cv.height/2-6, R=110;
+  rctx.clearRect(0,0,cv.width,cv.height);
+  const m = STATS.matches||1;
+  const vals = [
+    clamp((STATS.totalKills/m)/8, 0, 1),                 // Ураження
+    clamp((STATS.totalDamage/m)/900, 0, 1),               // Шкода
+    clamp(STATS.survived/m, 0, 1),                         // Виживання
+    clamp(STATS.wins/m, 0, 1),                             // Перемоги
+    clamp(STATS.mvp/m, 0, 1),                              // MVP
+    clamp(STATS.bestStreak/10, 0, 1)                       // Серія
+  ];
+  const labels = ['Ураження','Шкода','Виживання','Перемоги','MVP','Серія'];
+  const n = 6, ang0=-Math.PI/2;
+  // сітка
+  rctx.strokeStyle='rgba(214,168,79,.35)'; rctx.fillStyle='rgba(255,255,255,.04)';
+  for(let ring=1; ring<=3; ring++){
+    rctx.beginPath();
+    for(let i=0;i<=n;i++){ const a=ang0+i*(Math.PI*2/n); const r=R*ring/3; const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r; i===0?rctx.moveTo(x,y):rctx.lineTo(x,y); }
+    rctx.stroke();
+  }
+  for(let i=0;i<n;i++){ const a=ang0+i*(Math.PI*2/n); rctx.beginPath(); rctx.moveTo(cx,cy); rctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R); rctx.stroke(); }
+  // дані
+  rctx.beginPath();
+  for(let i=0;i<n;i++){ const a=ang0+i*(Math.PI*2/n); const r=R*vals[i]; const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r; i===0?rctx.moveTo(x,y):rctx.lineTo(x,y); }
+  rctx.closePath();
+  rctx.fillStyle='rgba(163,230,53,.32)'; rctx.strokeStyle='#a3e635'; rctx.lineWidth=2;
+  rctx.fill(); rctx.stroke();
+  // підписи
+  rctx.fillStyle='#d5dccc'; rctx.font='11px sans-serif'; rctx.textAlign='center';
+  for(let i=0;i<n;i++){ const a=ang0+i*(Math.PI*2/n); const x=cx+Math.cos(a)*(R+22), y=cy+Math.sin(a)*(R+22); rctx.fillText(labels[i], x, y+4); }
+}
+const SEARCH_NAMES = ['Shadow_Wolf','Viper','Nika','Rex_UA','Falcon','Ghost77','Storm',' Данило','Оксана','Kraken','Byk','Zmiy','Fenix','Vovk','Orel','Tigr','Barsuk','Sokil','Kolibri','Yastrub'];
+function runSearchingAnimation(){
+  const grid = document.getElementById('searchGrid'); grid.innerHTML='';
+  const cells=[];
+  for(let i=0;i<20;i++){ const d=document.createElement('div'); d.style.cssText='aspect-ratio:1;border-radius:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:.55rem;color:var(--muted);'; grid.appendChild(d); cells.push(d); }
+  let found=0;
+  document.getElementById('searchCount').textContent = '0 / 20 знайдено';
+  const iv = setInterval(()=>{
+    if(!document.getElementById('screen-searching').classList.contains('active')){ clearInterval(iv); return; }
+    if(found>=20){ clearInterval(iv); setTimeout(()=>goto_('mapreveal'), 500); return; }
+    const name = found===0 ? 'ВИ' : SEARCH_NAMES[(found-1)%SEARCH_NAMES.length];
+    cells[found].style.background='rgba(163,230,53,.18)'; cells[found].style.borderColor='var(--primary)'; cells[found].style.color='var(--primary)';
+    cells[found].textContent = name.slice(0,6);
+    found++;
+    document.getElementById('searchCount').textContent = found+' / 20 знайдено';
+  }, 160);
+}
+function runMapReveal(){
+  const mapKeys = Object.keys(MAPS);
+  const mapKey = mapKeys[Math.floor(Math.random()*mapKeys.length)];
+  const size = SIZES[Math.floor(Math.random()*SIZES.length)];
+  CHOICE.map = mapKey; CHOICE.size = size;
+  const m = MAPS[mapKey];
+  document.getElementById('revealIcon').textContent = m.icon;
+  document.getElementById('revealMapName').textContent = m.name;
+  document.getElementById('revealSizeInfo').textContent = size.label+' · '+size.desc;
+  setTimeout(()=>{
+    if(document.getElementById('screen-mapreveal').classList.contains('active')){
+      VIA_ONLINE = true;
+      goto_('class');
+      startClassTimer();
+    }
+  }, 2200);
+}
+/* ---------- ТАЙМЕР ВИБОРУ ПЕРСОНАЖА (30с + 10с додаткового часу) ---------- */
+let classTimerHandle=null;
+function startClassTimer(){
+  stopClassTimer();
+  let t=30, extra=false;
+  const box=document.getElementById('classTimerBox'), num=document.getElementById('classTimerNum'), lbl=document.getElementById('classTimerLabel');
+  box.style.display='flex'; num.textContent=t; num.style.color='var(--primary)';
+  lbl.textContent='⏱ Час на вибір:'; lbl.style.color='';
+  classTimerHandle = setInterval(()=>{
+    t--;
+    if(t<=0 && !extra){ extra=true; t=10; num.style.color='#ef4444'; lbl.style.color='#ef4444'; lbl.textContent='⏱ Додатковий час:'; }
+    else if(t<=0 && extra){
+      clearInterval(classTimerHandle); classTimerHandle=null;
+      const keys=CLASS_ORDER; CHOICE.cls = keys[Math.floor(Math.random()*keys.length)];
+      startMatch();
+      return;
+    }
+    num.textContent=t;
+  }, 1000);
+}
+function stopClassTimer(){
+  if(classTimerHandle){ clearInterval(classTimerHandle); classTimerHandle=null; }
+  const box=document.getElementById('classTimerBox'); if(box) box.style.display='none';
+}
+
 /* ---------- ЗАПОВНЕННЯ ЕКРАНІВ ВИБОРУ ---------- */
 const CHOICE = {map:null,size:null,cls:null};
+let VIA_ONLINE = false;
+
+/* ---------- СКЛАДНІСТЬ (лише офлайн, впливає на ворожих ботів) ---------- */
+const DIFFICULTIES = {
+  soldier:{key:'soldier',label:'Солдат',sub:'Легкий',icon:'①',desc:"Вороги слабші, повільніше реагують і рідше влучають.",dmgMult:0.68,hpMult:0.82,detectMult:0.75,fireChance:0.65,reloadMult:1.35},
+  sergeant:{key:'sergeant',label:'Сержант',sub:'Нормальний',icon:'②',desc:'Збалансований бій — стандартна поведінка ботів.',dmgMult:1.0,hpMult:1.0,detectMult:1.0,fireChance:0.9,reloadMult:1.0},
+  general:{key:'general',label:'Генерал',sub:'Важкий',icon:'③',desc:"Вороги б'ють сильніше, бачать далі й стріляють майже без промахів.",dmgMult:1.35,hpMult:1.2,detectMult:1.3,fireChance:1.0,reloadMult:0.8}
+};
+let DIFFICULTY = DIFFICULTIES.sergeant;
+function buildDifficultyGrid(){
+  const el=document.getElementById('difficultyGrid'); el.innerHTML='';
+  Object.values(DIFFICULTIES).forEach(d=>{
+    const card=document.createElement('div');
+    card.className='panel card';
+    card.innerHTML=`<div class="heading" style="font-size:1.6rem;color:var(--primary);">${d.icon}</div>
+      <h2 class="heading" style="margin-top:18px;">${d.label}</h2>
+      <p class="muted" style="margin:2px 0 0;">${d.sub}</p>
+      <p class="muted" style="font-size:.75rem;margin-top:12px;">${d.desc}</p>`;
+    card.onclick=()=>{ DIFFICULTY=d; goto_('map'); };
+    el.appendChild(card);
+  });
+}
+buildDifficultyGrid();
 
 function buildMapGrid(){
   const el=document.getElementById('mapGrid'); el.innerHTML='';
@@ -373,7 +691,7 @@ function buildClassGrid(){
       <h2 class="heading">${c.name}</h2><p class="muted" style="margin:2px 0 0;font-size:.85rem;">${c.role}</p>
       <div class="statrow"><span>HP <b>${c.hp}</b></span><span>SPD <b>${c.speed}</b></span><span>ARM <b>${c.armor}</b></span><span>STL <b>${c.stealth}</b></span></div>
       <div class="muted" style="font-size:.68rem;margin-top:8px;">Зброя (колесо миші): ${weaponNames}</div>`;
-    d.onclick=()=>{CHOICE.cls=key; startMatch();};
+    d.onclick=()=>{stopClassTimer(); CHOICE.cls=key; startMatch();};
     el.appendChild(d);
   });
 }
@@ -496,10 +814,11 @@ function makeEntity(team,clsKey,x,y,isPlayer){
       ? {mag:1,reserve:0,reloading:false,reloadT:0,shotT:0}
       : {mag:w.mag,reserve:w.maxAmmo,reloading:false,reloadT:0,shotT:0};
   });
+  const hpMult = team==='enemy' ? DIFFICULTY.hpMult : 1.0;
   return {
     id:ENTID++, team, cls:clsKey, isPlayer:!!isPlayer,
     x,y, angle:0, radius:15,
-    hp:c.hp, maxHp:c.hp, armor, baseStealth:c.stealth, mapStealthMult:map.stealthMult,
+    hp:c.hp*hpMult, maxHp:c.hp*hpMult, armor, baseStealth:c.stealth, mapStealthMult:map.stealthMult,
     speed:spd, weapons, weaponIdx:0, weaponKey:weapons[0], ammoState, standStill:0,
     state:'patrol', downed:false, downedAt:0, dead:false,
     abilityCd:0, itemCd:0, itemActiveT:0, speedBuffT:0,
@@ -538,7 +857,8 @@ function effectiveStealth(e){
 }
 function canSee(a,b){
   const d = dist(a,b);
-  const base = 780*MAPS[RUN.mapKey].rangeMod;
+  const dm = a.team==='enemy' ? DIFFICULTY.detectMult : 1.0;
+  const base = 780*MAPS[RUN.mapKey].rangeMod*dm;
   const eff = base - effectiveStealth(b)*4.2;
   if(d>140 && d > Math.max(120, eff)) return false;
   return hasLineOfSight(a,b);
@@ -760,7 +1080,8 @@ function startMatch(){
   const layout = buildMapLayout(RUN.mapKey, ms, RUN.seed+7, allyBase, enemyBase, cap, RUN.capRadius);
   RUN.covers = layout.covers; RUN.swamps = layout.swamps;
 
-  document.getElementById('opLabel').textContent = `ОПЕРАЦІЯ: ${MAPS[RUN.mapKey].name.toUpperCase()} // MAP ${ms}`;
+  const diffTag = VIA_ONLINE ? '' : ` // ${DIFFICULTY.label.toUpperCase()}`;
+  document.getElementById('opLabel').textContent = `ОПЕРАЦІЯ: ${MAPS[RUN.mapKey].name.toUpperCase()} // MAP ${ms}${diffTag}`;
   goto_('battle');
   pushLog(`Місію розпочато. Клас: ${CLASSES[CHOICE.cls].name}.`);
   RUN.lastT = performance.now();
@@ -927,7 +1248,8 @@ function tryReload(e){
   if(w.melee) return;
   const st=e.ammoState[e.weaponKey];
   if(st.reloading || st.mag>=w.mag || st.reserve<=0) return;
-  st.reloading=true; st.reloadT=w.reload||1.5;
+  const rMult = e.team==='enemy' ? DIFFICULTY.reloadMult : 1.0;
+  st.reloading=true; st.reloadT=(w.reload||1.5)*rMult;
 }
 function meleeAttack(e,dmg,range){
   RUN.entities.forEach(t=>{
@@ -1049,7 +1371,7 @@ function updateBullets(dt){
     if(b.x<0||b.x>RUN.mapSize||b.y<0||b.y>RUN.mapSize){ b.alive=false; return; }
     if(b.weaponKey==='__frag'){
       b.life-=dt;
-      if(b.life<=0){ explode(b.x,b.y,90,75,b.team,true); b.alive=false; }
+      if(b.life<=0){ explode(b.x,b.y,90,75,b.team,true,b.owner); b.alive=false; }
       return;
     }
     const w = WEAPONS[b.weaponKey];
@@ -1061,7 +1383,7 @@ function updateBullets(dt){
       b.alive=false;
       const hitDmg = w.dmgMax!==undefined ? w.dmgMax : w.dmg;
       damageCover(hitCover, hitDmg);
-      if(w.splash) explode(b.x,b.y,w.splash,w.dmg*0.6,b.team,false);
+      if(w.splash) explode(b.x,b.y,w.splash,w.dmg*0.6,b.team,false,b.owner);
       spawnParticle(b.x,b.y,'#8a8a80',10);
       return;
     }
@@ -1074,7 +1396,7 @@ function updateBullets(dt){
     if(hit){
       b.alive=false;
       if(w.splash){
-        explode(b.x,b.y,w.splash,w.dmg,b.team,true);
+        explode(b.x,b.y,w.splash,w.dmg,b.team,true,b.owner);
       } else {
         let dmg = w.dmg;
         if(w.dmgMax!==undefined){
@@ -1087,7 +1409,7 @@ function updateBullets(dt){
   });
   RUN.bullets = RUN.bullets.filter(b=>b.alive);
 }
-function explode(x,y,radius,dmg,team,stun){
+function explode(x,y,radius,dmg,team,stun,attacker){
   spawnParticle(x,y,'#f97316',radius);
   SND.explosion();
   RUN.entities.forEach(t=>{
@@ -1095,7 +1417,7 @@ function explode(x,y,radius,dmg,team,stun){
     const d=dist({x,y},t);
     if(d<radius){
       const falloff = 1-(d/radius)*0.5;
-      dealDamage(t, dmg*falloff, null, team);
+      dealDamage(t, dmg*falloff, attacker||null, team);
       if(stun && t.team!==team){ t.stunT=Math.max(t.stunT||0,1.0); }
     }
   });
@@ -1128,8 +1450,11 @@ function updateMines(dt){
 
 function dealDamage(target,rawDmg,attacker,attackerTeam){
   if(target.dead||target.downed) return;
+  const atkTeam = attacker ? attacker.team : attackerTeam;
+  if(atkTeam==='enemy') rawDmg *= DIFFICULTY.dmgMult;
   const mitig = Math.max(1, rawDmg - target.armor*0.6);
   target.hp -= mitig;
+  if(attacker && attacker.isPlayer){ attacker.damageDealt = (attacker.damageDealt||0) + mitig; }
   SND.hit();
   if(target.isPlayer){ flashDamage(); }
   if(target.hp<=0 && !target.downed){
@@ -1256,7 +1581,8 @@ function updateBot(e,dt){
     e.standStill=0;
   } else e.standStill+=dt;
 
-  if(wantShoot && e.stunT<=0 && Math.random()<0.9) tryShoot(e);
+  const fireChance = e.team==='enemy' ? DIFFICULTY.fireChance : 0.9;
+  if(wantShoot && e.stunT<=0 && Math.random()<fireChance) tryShoot(e);
   const st = e.ammoState[e.weaponKey];
   if(!w.melee && st.mag<=0 && !st.reloading && e.stunT<=0) tryReload(e);
 
@@ -1318,6 +1644,10 @@ function stopMatch(navigate){
 
 function showEndScreen(winner,reason){
   RUN.active=false;
+  recordMatchStats(winner);
+  const primaryBtn = document.getElementById('endPrimaryBtn');
+  if(VIA_ONLINE){ primaryBtn.textContent='Новий пошук бою'; primaryBtn.onclick=()=>goto_('searching'); }
+  else { primaryBtn.textContent='Нова операція'; primaryBtn.onclick=()=>goto_('map'); }
   const titleEl=document.getElementById('endTitle');
   const subEl=document.getElementById('endSub');
   const playerWon = winner==='ally';
