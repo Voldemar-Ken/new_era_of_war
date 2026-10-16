@@ -33,6 +33,41 @@
 .mode-pill.active{background:rgba(163,230,53,.14);border-color:var(--primary);color:var(--primary);}
 .mode-pill:hover{border-color:var(--primary);}
 #minimap{image-rendering:auto;}
+
+.sb-top{display:flex;align-items:center;justify-content:center;gap:34px;margin:4px 0 2px;}
+.sb-top h1{margin:0;font-size:2.6rem;}
+.sb-score{font-size:2.6rem;font-weight:900;min-width:70px;text-shadow:0 0 18px currentColor;}
+.sb-tabs{display:flex;gap:8px;justify-content:center;margin:12px 0;}
+.sb-tab{padding:7px 18px;border-radius:6px;border:1px solid var(--gold);background:rgba(0,0,0,.3);color:var(--muted);font-family:inherit;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;}
+.sb-tab.active{background:rgba(163,230,53,.16);border-color:var(--primary);color:var(--primary);}
+.sb-cols{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--gold);border-radius:8px;overflow:hidden;background:rgba(8,14,30,.88);text-align:left;}
+.sb-team.ally{border-right:1px solid rgba(255,255,255,.14);background:linear-gradient(90deg,rgba(40,100,190,.28),transparent 80%);}
+.sb-team.enemy{background:linear-gradient(270deg,rgba(190,50,80,.28),transparent 80%);}
+.sb-row{position:relative;display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.07);min-height:58px;}
+.sb-row.enemy{flex-direction:row-reverse;text-align:right;}
+.sb-row.me{background:rgba(110,180,255,.24);}
+.sb-ava{width:46px;height:46px;border-radius:50%;border:2px solid #6ec6ff;overflow:hidden;flex:none;background:#0a1020;}
+.sb-row.enemy .sb-ava{border-color:#ff7a8a;}
+.sb-ava canvas{width:100%;height:100%;display:block;}
+.sb-name{flex:1.3;min-width:0;font-size:.8rem;}
+.sb-name b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-name small{font-size:.62rem;}
+.sb-cell{flex:1;min-width:0;font-size:.74rem;}
+.sb-lbl{display:block;font-size:.55rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+.sb-cell b{display:block;font-weight:600;}
+.sb-cell.kda b{font-size:.95rem;letter-spacing:.08em;} .sb-cell.kda u{text-decoration:none;color:#ff7a8a;}
+.sb-line{display:flex;align-items:center;gap:6px;margin-top:3px;} .sb-row.enemy .sb-line{flex-direction:row-reverse;}
+.sb-bar{flex:1;height:6px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;} .sb-bar i{display:block;height:100%;}
+.sb-line em{font-style:normal;font-size:.62rem;color:#cfe3f0;min-width:30px;}
+.sb-rate{width:50px;text-align:center;flex:none;} .sb-rate b{display:block;font-size:.85rem;}
+.sb-medal{width:32px;height:32px;margin:0 auto 1px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;border:3px solid;background:rgba(0,0,0,.35);}
+.sb-medal.gold{border-color:#facc15;color:#facc15;} .sb-medal.silver{border-color:#cbd5e1;color:#cbd5e1;} .sb-medal.bronze{border-color:#cd7f32;color:#cd7f32;}
+.sb-mvp{display:inline-block;margin:0 6px;vertical-align:middle;font-size:.52rem;font-weight:900;letter-spacing:.1em;padding:1px 6px;border-radius:3px;color:#1a1200;}
+.sb-mvp.gold{background:#facc15;} .sb-mvp.silver{background:#cbd5e1;}
+@container (max-width:900px){.sb-cols{grid-template-columns:1fr;}.sb-score{font-size:1.8rem}}
+#stage{position:fixed;left:0;top:0;width:100vw;height:100vh;container-type:inline-size;overflow:hidden;--sh:100vh;}
+body.res-fixed #stage{left:50%;top:50%;width:var(--lw);height:720px;--sh:720px;transform:translate(-50%,-50%) scale(var(--f));transform-origin:center center;}
+body.res-fixed{background:#05080f;}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'VT323',ui-monospace,monospace;font-size:19px;overflow:hidden;}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.06;background-image:radial-gradient(#fff .6px,transparent .6px);background-size:5px 5px;z-index:50;}
 .heading{letter-spacing:.02em;text-transform:uppercase;font-weight:400;font-family:var(--pxfont);line-height:1.5;}
@@ -54,23 +89,23 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
 .logo{font-weight:900;letter-spacing:.06em;color:var(--primary);text-transform:uppercase;cursor:pointer;background:none;border:none;font-size:1.1rem;font-family:inherit;}
 .logo span{color:var(--text);}
 .step{color:var(--primary);font-size:.72rem;letter-spacing:.25em;margin-bottom:10px;text-transform:uppercase;}
-.scrollpane{height:100vh;overflow-y:auto;}
+.scrollpane{height:var(--sh);overflow-y:auto;}
 .card{padding:20px;cursor:pointer;transition:.15s;}
 .card:hover{border-color:var(--primary);transform:translateY(-2px);}
 .card h2{margin:14px 0 4px;font-size:1.25rem;}
 .statrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:.72rem;}
 .statrow span{background:rgba(0,0,0,.3);padding:5px 9px;border-radius:5px;}
 .grid2{display:grid;gap:16px;}
-@media(min-width:640px){.grid2{grid-template-columns:1fr 1fr;}}
-@media(min-width:900px){.grid3{grid-template-columns:repeat(3,1fr);}}
+@container (min-width:640px){.grid2{grid-template-columns:1fr 1fr;}}
+@container (min-width:900px){.grid3{grid-template-columns:repeat(3,1fr);}}
 .grid3{display:grid;gap:16px;}
 .grid-cls{display:grid;gap:14px;grid-template-columns:1fr;}
-@media(min-width:640px){.grid-cls{grid-template-columns:1fr 1fr;}}
-@media(min-width:980px){.grid-cls{grid-template-columns:repeat(3,1fr);}}
+@container (min-width:640px){.grid-cls{grid-template-columns:1fr 1fr;}}
+@container (min-width:980px){.grid-cls{grid-template-columns:repeat(3,1fr);}}
 
 /* ---- BATTLE LAYOUT ---- */
 #screen-battle{position:fixed;inset:0;background:#000;}
-#battleGrid{display:grid;grid-template-columns:1fr 300px;gap:0;height:100vh;}
+#battleGrid{display:grid;grid-template-columns:1fr 300px;gap:0;height:var(--sh);}
 #gameCanvasWrap{position:relative;overflow:hidden;background:#0e1410;}
 #gameCanvas{display:block;width:100%;height:100%;}
 #hud{background:var(--panel2);border-left:1px solid var(--gold);padding:16px;overflow-y:auto;}
@@ -106,6 +141,7 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
 </style>
 </head>
 <body>
+<div id="stage">
 
 <!-- =============== MENU =============== -->
 <section id="screen-menu" class="screen active scrollpane grid-bg">
@@ -154,8 +190,8 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
 </section>
 
 <!-- =============== ONLINE: CONNECTING =============== -->
-<section id="screen-connecting" class="screen grid-bg" style="min-height:100vh;">
-  <main class="wrap" style="padding:0 22px;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+<section id="screen-connecting" class="screen grid-bg" style="min-height:var(--sh);">
+  <main class="wrap" style="padding:0 22px;height:var(--sh);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
     <div class="spinner" style="width:54px;height:54px;border-radius:50%;border:3px solid rgba(163,230,53,.2);border-top-color:var(--primary);animation:spin 1s linear infinite;"></div>
     <h2 class="heading" style="margin-top:22px;font-size:1.3rem;">Підключення до сервера...</h2>
     <p class="muted" style="font-size:.78rem;margin-top:6px;">Авторизація · синхронізація профілю</p>
@@ -163,7 +199,7 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
 </section>
 
 <!-- =============== ONLINE: LOBBY =============== -->
-<section id="screen-lobby" class="screen grid-bg" style="min-height:100vh;">
+<section id="screen-lobby" class="screen grid-bg" style="min-height:var(--sh);">
   <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;align-items:center;">
     <button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button>
     <button id="profileBtn" onclick="goto_('stats')" style="display:flex;align-items:center;gap:10px;background:none;border:1px solid var(--gold);border-radius:20px;padding:6px 14px 6px 6px;cursor:pointer;color:var(--text);font-family:inherit;">
@@ -228,8 +264,8 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
 </section>
 
 <!-- =============== SEARCHING FOR PLAYERS =============== -->
-<section id="screen-searching" class="screen grid-bg" style="min-height:100vh;">
-  <main class="wrap" style="padding:0 22px;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+<section id="screen-searching" class="screen grid-bg" style="min-height:var(--sh);">
+  <main class="wrap" style="padding:0 22px;height:var(--sh);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
     <div class="spinner" style="width:54px;height:54px;border-radius:50%;border:3px solid rgba(163,230,53,.2);border-top-color:var(--primary);animation:spin 1s linear infinite;"></div>
     <h2 class="heading" style="margin-top:22px;font-size:1.3rem;">Пошук гравців...</h2>
     <p class="muted" style="font-size:.78rem;margin:6px 0 20px;" id="searchCount">0 / 20 знайдено</p>
@@ -238,8 +274,8 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
 </section>
 
 <!-- =============== MAP REVEAL =============== -->
-<section id="screen-mapreveal" class="screen grid-bg" style="min-height:100vh;">
-  <main class="wrap" style="padding:0 22px;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+<section id="screen-mapreveal" class="screen grid-bg" style="min-height:var(--sh);">
+  <main class="wrap" style="padding:0 22px;height:var(--sh);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
     <div class="step">МАТЧ ЗНАЙДЕНО</div>
     <div id="revealIcon" style="font-size:4rem;margin:10px 0;"></div>
     <h1 class="heading" id="revealMapName" style="font-size:2.6rem;margin:0;">—</h1>
@@ -318,6 +354,13 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
         <span><b>Тактичні підказки</b><small class="muted" style="display:block;margin-top:3px;">Показувати підказки керування під час бою</small></span>
         <input type="checkbox" id="optHints" checked style="width:20px;height:20px;accent-color:var(--primary);">
       </label>
+      <div style="padding:20px;border-top:1px solid rgba(255,255,255,.08);">
+        <div style="display:flex;justify-content:space-between;gap:20px;align-items:center;">
+          <span><b>Розширення екрана</b><small class="muted" style="display:block;margin-top:3px;">Для всієї програми: меню, лобі, налаштування й бій. Задає пропорції екрана та чіткість картинки бою (менше — пікселізованіше, більше — чіткіше, але важче для відеокарти). Інтерфейс і поле зору в бою масштабуються пропорційно.</small></span>
+          <select id="optRes" style="background:rgba(0,0,0,.35);border:1px solid var(--gold);color:var(--text);border-radius:6px;padding:8px 10px;font-family:inherit;font-size:.8rem;width:170px;flex:none;"></select>
+        </div>
+        <div class="muted" id="optResInfo" style="font-size:.68rem;margin-top:8px;"></div>
+      </div>
     </section>
   </main>
 </section>
@@ -386,19 +429,23 @@ header.top .wrap{display:flex;justify-content:space-between;align-items:center;p
 </section>
 
 <!-- =============== END SCREEN =============== -->
-<section id="screen-end" class="screen grid-bg" style="min-height:100vh;">
-  <main class="wrap" style="padding:90px 22px;text-align:center;" id="endScreen">
+<section id="screen-end" class="screen scrollpane grid-bg">
+  <main class="wrap" style="padding:30px 22px 50px;text-align:center;max-width:1280px;" id="endScreen">
     <div class="step" style="justify-content:center;display:flex;">РЕЗУЛЬТАТ ОПЕРАЦІЇ</div>
-    <h1 class="heading" id="endTitle">—</h1>
-    <p class="muted" id="endSub" style="font-size:1.05rem;"></p>
-    <div id="endStats" class="panel" style="max-width:520px;margin:24px auto 0;padding:24px;text-align:left;"></div>
-    <div style="margin-top:30px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+    <div class="sb-top"><span class="sb-score" id="sbA" style="color:#6ec6ff;">0</span><h1 class="heading" id="endTitle">—</h1><span class="sb-score" id="sbE" style="color:#ff7a8a;">0</span></div>
+    <p class="muted" id="endSub" style="font-size:.95rem;margin:2px 0;"></p>
+    <p class="muted" id="sbMeta" style="font-size:.72rem;margin:0;"></p>
+    <div class="sb-tabs"><button class="sb-tab active" data-tab="dmg" onclick="sbTab('dmg')">Шкода</button><button class="sb-tab" data-tab="kda" onclick="sbTab('kda')">Бій</button></div>
+    <div id="scoreboard"></div>
+    <div id="endStats" style="display:none;"></div>
+    <div style="margin-top:26px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
       <button class="btn btn-primary" id="endPrimaryBtn" onclick="goto_('map')">Нова операція</button>
       <button class="btn btn-ghost" onclick="goto_('menu')">Головне меню</button>
     </div>
   </main>
 </section>
 
+</div>
 <script>
 "use strict";
 /* =====================================================================
@@ -2555,6 +2602,7 @@ Object.keys(S).forEach(k=>{
 });
 const ok=i=>!!i&&i.complete&&i.naturalWidth>0;
 const SNP=window.__SNP,SNI={};Object.keys(SNP).forEach(k=>{const i=new Image();i.src=SNP[k].src;SNI[k]=i;});
+window.__SPRITES={SNP:SNP,SNI:SNI};
 function A(e){return e._an||(e._an={px:e.x,py:e.y,ph:Math.random()*6,mv:0,shot:0,hurt:0,melee:0,t:performance.now(),ls:e.shotT||0,hp:e.hp});}
 const DR=window.__DRN,DRI=new Image();if(DR)DRI.src=DR.src;
 const _draw=window.drawEntity,_render=window.render;
@@ -2699,6 +2747,147 @@ window.render=function(){
   if(DR&&ok(DRI)){const f=DR.frames[Math.floor(t*10)%DR.frames.length];ctx.scale(DR.k,DR.k);ctx.drawImage(DRI,f[0],f[1],f[2],f[3],-f[4],-f[5],f[2],f[3]);}
   else ctx.drawImage(IMG.drone,-D.w*K/2,-D.h*K/2,D.w*K,D.h*K);
   ctx.restore();
+};
+})();
+
+</script>
+<script>
+/* NEW ERA OF WAR — статистика після бою (двоколонкова таблиця з рейтингом і MVP) */
+(function(){
+"use strict";
+const ST=e=>e._st||(e._st={dmg:0,taken:0,deaths:0,assists:0,point:0,hits:{}});
+const _deal=window.dealDamage;
+window.dealDamage=function(t,d,a,at){
+  const hp0=t.hp,dn0=t.downed,r=_deal(t,d,a,at);
+  const lost=Math.max(0,hp0-Math.max(0,t.hp));
+  if(lost>0){ST(t).taken+=lost;if(a&&a.team!==t.team){ST(a).dmg+=lost;ST(t).hits[a.id]=RUN.timeLeft;}}
+  if(!dn0&&t.downed){
+    const S=ST(t);S.deaths++;
+    for(const id in S.hits){if(!(a&&+id===a.id)&&S.hits[id]-RUN.timeLeft<8){const o=RUN.entities.find(x=>x.id==id);if(o)ST(o).assists++;}}
+  }
+  return r;
+};
+const _upd=window.update;
+window.update=function(dt){
+  _upd(dt);
+  if(RUN&&RUN.entities&&!RUN.ended&&RUN.capture){
+    const c=RUN.capture,R=RUN.capRadius;
+    RUN.entities.forEach(e=>{if(!e.dead&&!e.downed&&Math.hypot(e.x-c.x,e.y-c.y)<R)ST(e).point+=dt;});
+  }
+};
+const rate=(e,S)=>Math.max(0,Math.min(20,3.5+(e.kills||0)*1.3+S.assists*.7-S.deaths*1+S.dmg/380+S.point/25));
+const nm=(e,i,team)=>{
+  if(e.isPlayer)return 'Боєць';
+  const L=(typeof SEARCH_NAMES!=='undefined')?SEARCH_NAMES:[];
+  return (L.length?L[(i*2+(team==='ally'?0:1))%L.length]:('Бот '+(i+1))).trim();
+};
+const fmt=n=>Math.round(n).toLocaleString('uk-UA').replace(/\u00a0/g,' ');
+let DATA=null,TAB='dmg';
+function collect(winner){
+  const out={};
+  ['ally','enemy'].forEach(t=>{
+    const list=RUN.entities.filter(e=>e.team===t).map((e,i)=>{const S=ST(e);return {e,S,k:e.kills||0,name:nm(e,i,t),r:rate(e,S)};});
+    list.sort((a,b)=>b.r-a.r);
+    const sum=f=>list.reduce((s,o)=>s+f(o),0);
+    out[t]={list,dmg:sum(o=>o.S.dmg),taken:sum(o=>o.S.taken),point:sum(o=>o.S.point),kills:sum(o=>o.k),assists:sum(o=>o.S.assists)};
+  });
+  DATA={teams:out,winner};
+}
+const pct=(v,t)=>t>0?Math.round(v/t*100):0;
+const cell=(label,val,p,color)=>`<div class="sb-cell"><span class="sb-lbl">${label}</span><b>${val}</b><div class="sb-line"><div class="sb-bar"><i style="width:${Math.min(100,p)}%;background:${color}"></i></div><em>${p}%</em></div></div>`;
+function row(o,team,tot,idx){
+  const c=CLASSES[o.e.cls],S=o.S,me=o.e.isPlayer?' me':'';
+  const mvp=idx===0?`<span class="sb-mvp ${(DATA.winner===team||DATA.winner==='draw')?'gold':'silver'}">MVP</span>`:'';
+  const med=o.r>=9?'gold':o.r>=5?'silver':'bronze';
+  const medal=`<div class="sb-rate"><div class="sb-medal ${med}">${med==='bronze'?'●':'⚔'}</div><b>${o.r.toFixed(1)}</b></div>`;
+  let cols;
+  if(TAB==='dmg'){
+    const part=pct(o.k+S.assists,tot.kills);
+    cols=cell('Шкода',fmt(S.dmg),pct(S.dmg,tot.dmg),'#e0507a')+cell('Отримано',fmt(S.taken),pct(S.taken,tot.taken),'#3aa7d9')+cell('Точка',Math.round(S.point)+' с',pct(S.point,tot.point),'#d9a93a')+cell('Участь',Math.min(100,part)+'%',Math.min(100,part),'#2fbf9b');
+  }else{
+    cols=`<div class="sb-cell kda"><span class="sb-lbl">У / С / П</span><b>${o.k} <u>${S.deaths}</u> ${S.assists}</b></div>`+cell('Шкода',fmt(S.dmg),pct(S.dmg,tot.dmg),'#e0507a')+medal;
+  }
+  return `<div class="sb-row ${team}${me}"><div class="sb-ava"><canvas width="46" height="46" data-cls="${o.e.cls}"></canvas></div><div class="sb-name"><b>${o.name}${mvp}</b><small style="color:${c.color}">${c.icon} ${c.name}</small></div>${cols}</div>`;
+}
+function paint(){
+  const box=document.getElementById('scoreboard');if(!box||!DATA)return;
+  const T=DATA.teams;
+  box.innerHTML=`<div class="sb-cols"><div class="sb-team ally">${T.ally.list.map((o,i)=>row(o,'ally',T.ally,i)).join('')}</div><div class="sb-team enemy">${T.enemy.list.map((o,i)=>row(o,'enemy',T.enemy,i)).join('')}</div></div>`;
+  box.querySelectorAll('canvas').forEach(cv=>{
+    const cls=cv.dataset.cls,g=cv.getContext('2d'),SP=window.__SPRITES,d=SP&&SP.SNP[cls],im=SP&&SP.SNI[cls];
+    g.fillStyle=CLASSES[cls].color+'33';g.fillRect(0,0,46,46);
+    if(d&&im&&im.complete&&d.down&&d.down.length){
+      const f=d.down[0],side=Math.min(f[2],f[3]*.62),sx=f[0]+Math.max(0,Math.min(f[2]-side,f[4]-side/2));
+      g.imageSmoothingEnabled=false;g.drawImage(im,sx,f[1],side,side,0,0,46,46);
+    }else{g.fillStyle=CLASSES[cls].color;g.font='22px sans-serif';g.textAlign='center';g.fillText(CLASSES[cls].icon,23,31);}
+  });
+  document.querySelectorAll('.sb-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===TAB));
+}
+window.sbTab=function(t){TAB=t;paint();};
+const _show=window.showEndScreen;
+window.showEndScreen=function(winner,reason){
+  _show(winner,reason);
+  try{
+    collect(winner);TAB='dmg';
+    document.getElementById('sbA').textContent=DATA.teams.ally.kills;
+    document.getElementById('sbE').textContent=DATA.teams.enemy.kills;
+    const el=Math.max(0,(RUN.sizeInfo.time||0)-Math.max(0,RUN.timeLeft)),mm=Math.floor(el/60),ss=Math.floor(el%60);
+    document.getElementById('sbMeta').textContent=`${MAPS[RUN.mapKey].name} · ${RUN.sizeInfo.label} · ${GAME_MODE.label} · тривалість ${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+    paint();
+  }catch(err){console.error('scoreboard',err);}
+};
+})();
+</script>
+<script>
+/* NEW ERA OF WAR — розширення екрана для всієї програми (меню, лобі, налаштування, бій) */
+(function(){
+"use strict";
+const PRESETS=[[800,600],[1024,768],[1280,720],[1366,768],[1600,900],[1920,1080],[2560,1440],[3840,2160]];
+const KEY='neow_resolution_v1',DESIGN_H=720;    // висота макета не залежить від вибору — інтерфейс і поле зору пропорційні
+let cur=null;
+try{const v=localStorage.getItem(KEY);if(v&&v!=='auto'){const a=v.split('x').map(Number);if(PRESETS.some(p=>p[0]===a[0]&&p[1]===a[1]))cur={w:a[0],h:a[1]};}}catch(e){}
+const sel=document.getElementById('optRes'),inf=document.getElementById('optResInfo'),root=document.documentElement;
+sel.innerHTML='<option value="auto">Авто (за вікном)</option>'+PRESETS.map(p=>'<option value="'+p[0]+'x'+p[1]+'">'+p[0]+' × '+p[1]+'</option>').join('');
+sel.value=cur?cur.w+'x'+cur.h:'auto';
+function layout(){
+  if(!cur){document.body.classList.remove('res-fixed');root.style.removeProperty('--lw');root.style.removeProperty('--f');inf.textContent='Програма займає все вікно браузера (поточна поведінка).';return;}
+  const lw=DESIGN_H*cur.w/cur.h,f=Math.min(innerWidth/lw,innerHeight/DESIGN_H);
+  document.body.classList.add('res-fixed');
+  root.style.setProperty('--lw',lw+'px');root.style.setProperty('--f',f);
+  inf.textContent='Уся програма показується в екрані '+cur.w+' × '+cur.h+' (пропорції '+(Math.round(cur.w/cur.h*100)/100)+':1) і вписується у вікно зі смугами по краях.';
+}
+layout();
+window.addEventListener('resize',layout);
+sel.onchange=function(){
+  const v=sel.value;cur=v==='auto'?null:{w:+v.split('x')[0],h:+v.split('x')[1]};
+  try{localStorage.setItem(KEY,v);}catch(e){}
+  layout();
+  if(RUN&&RUN.active&&document.getElementById('screen-battle').classList.contains('active'))resizeCanvas();
+};
+// бій: внутрішній розмір картинки = розмір поля у «макетних» пікселях × k (k = H/720), поле зору від вибору не залежить
+const _rc=window.resizeCanvas;
+window.resizeCanvas=function(){
+  _rc();
+  const canvas=document.getElementById('gameCanvas'),wrap=document.getElementById('gameCanvasWrap');
+  const k=cur?cur.h/DESIGN_H:1;
+  if(k!==1){
+    canvas.width=Math.round(wrap.clientWidth*k);canvas.height=Math.round(wrap.clientHeight*k);
+    ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=false;
+    CW=wrap.clientWidth;CH=wrap.clientHeight;
+  }
+  window.__resK=k;
+  canvas.style.imageRendering=(cur&&k<(parseFloat(getComputedStyle(root).getPropertyValue('--f'))||1))?'pixelated':'auto';   // при збільшенні малої картинки — чіткі пікселі
+  canvas.onmousemove=function(e){
+    const b=canvas.getBoundingClientRect();
+    mouse.x=(e.clientX-b.left)*CW/b.width;mouse.y=(e.clientY-b.top)*CH/b.height;
+  };
+};
+const _render=window.render;
+window.render=function(){
+  const k=window.__resK;
+  if(k&&k!==1&&ctx)ctx.setTransform(k,0,0,k,0,0);
+  _render();
+  if(k&&k!==1&&ctx)ctx.setTransform(1,0,0,1,0,0);
 };
 })();
 
