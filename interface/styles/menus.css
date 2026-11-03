@@ -1,0 +1,9 @@
+/* Меню й лобі: друзі, таймер вибору, перемикач режимів */
+.friend-row{display:flex;align-items:center;gap:8px;font-size:.78rem;padding:6px 8px;background:rgba(0,0,0,.25);border-radius:6px;}
+.friend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+#classTimerBox{display:none;align-items:center;gap:10px;justify-content:center;margin-bottom:18px;}
+#classTimerNum{font-size:1.6rem;font-weight:900;color:var(--primary);min-width:44px;text-align:center;}
+.mode-pill{flex:1;padding:12px 10px;border-radius:8px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);color:var(--muted);cursor:pointer;text-align:center;font-size:.78rem;transition:.15s;}
+.mode-pill b{display:block;font-size:.95rem;margin-bottom:2px;}
+.mode-pill.active{background:rgba(163,230,53,.14);border-color:var(--primary);color:var(--primary);}
+.mode-pill:hover{border-color:var(--primary);}

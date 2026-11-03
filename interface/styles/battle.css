@@ -1,0 +1,36 @@
+/* Екран бою: поле, HUD, мінікарта, зброя */
+/* ---- BATTLE LAYOUT ---- */
+#screen-battle{position:fixed;inset:0;background:#000;}
+#battleGrid{display:grid;grid-template-columns:1fr 300px;gap:0;height:var(--sh);}
+#gameCanvasWrap{position:relative;overflow:hidden;background:#0e1410;}
+#gameCanvas{display:block;width:100%;height:100%;}
+#hud{background:var(--panel2);border-left:1px solid var(--gold);padding:16px;overflow-y:auto;}
+#topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px 150px 10px 54px;background:linear-gradient(180deg,rgba(0,0,0,.65),transparent);font-size:.72rem;letter-spacing:.1em;color:var(--primary);pointer-events:none;z-index:5;}
+#radarNotice{position:absolute;top:44px;left:50%;transform:translateX(-50%);background:rgba(163,230,53,.15);border:1px solid var(--primary);color:var(--primary);padding:5px 14px;border-radius:20px;font-size:.72rem;letter-spacing:.15em;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5;}
+#toast{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(10,15,10,.85);border:1px solid var(--gold);padding:8px 18px;border-radius:6px;font-size:.78rem;opacity:0;transition:opacity .4s;pointer-events:none;max-width:80%;text-align:center;z-index:5;}
+#logfeed{position:absolute;bottom:16px;right:16px;width:270px;font-size:.68rem;line-height:1.5;color:#d5dccc;pointer-events:none;text-shadow:0 1px 3px #000;z-index:5;}
+#logfeed div{opacity:.9;}
+.hpbar{height:9px;background:#000;border-radius:5px;overflow:hidden;border:1px solid rgba(255,255,255,.1);}
+.hpbar>i{display:block;height:100%;background:var(--primary);transition:width .15s;}
+.ammobar{font-variant-numeric:tabular-nums;}
+.hud-stat{border-left:2px solid var(--primary);padding-left:8px;}
+.hud-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.68rem;}
+#minimapWrap{position:relative;}
+#minimap{background:#080c08;border:1px solid var(--gold);border-radius:4px;display:block;width:100%;}
+.cooldown-pill{display:flex;justify-content:space-between;font-size:.65rem;background:rgba(0,0,0,.35);padding:6px 8px;border-radius:5px;margin-top:6px;}
+.keyhint{font-size:.6rem;color:var(--muted);letter-spacing:.05em;margin-top:14px;line-height:1.6;border-top:1px solid rgba(255,255,255,.08);padding-top:10px;}
+.progresswrap{margin-top:10px;}
+.progresswrap .lbl{display:flex;justify-content:space-between;font-size:.62rem;margin-bottom:3px;}
+.pbar{height:6px;background:#000;border-radius:4px;overflow:hidden;}
+.pbar>i{display:block;height:100%;}
+.wbtn{
+  flex:1 1 auto; min-width:44px; padding:5px 6px; text-align:center; cursor:pointer;
+  background:rgba(255,255,255,.04); border:1px solid rgba(214,168,79,.25); border-radius:6px;
+  font-size:.6rem; color:var(--muted); line-height:1.3;
+}
+.wbtn b{display:block;font-size:.68rem;color:var(--text);}
+.wbtn.active{border-color:var(--primary); color:var(--primary); background:rgba(163,230,53,.12);}
+.wbtn.active b{color:var(--primary);}
+.wbtn.empty{opacity:.45;}
+#endScreen h1{font-size:3rem;}
+#endStats{margin-top:24px;}

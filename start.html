@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEW ERA OF WAR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="interface/styles/base.css">
+<link rel="stylesheet" href="interface/styles/menus.css">
+<link rel="stylesheet" href="interface/styles/battle.css">
+<link rel="stylesheet" href="interface/styles/scoreboard.css">
+<link rel="stylesheet" href="interface/styles/replays.css">
+</head>
+<body>
+<div id="stage">
+
+<!-- =============== MENU =============== -->
+<section id="screen-menu" class="screen active scrollpane grid-bg">
+  <header class="top"><div class="wrap"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button></div></header>
+  <main class="wrap" style="padding:70px 22px;">
+    <div class="grid2" style="align-items:center;gap:50px;">
+      <section>
+        <div class="step"><span style="display:inline-block;width:34px;height:1px;background:var(--primary);vertical-align:middle;margin-right:8px;"></span>ТАКТИЧНА ОПЕРАЦІЯ // 01</div>
+        <h1 class="heading" style="font-size:4.4rem;line-height:.86;margin:0;">New<br><span style="color:var(--primary);">Era</span><br>of War</h1>
+        <p class="muted" style="max-width:480px;margin-top:26px;font-size:1.05rem;line-height:1.6;">Тактичний командний шутер зверху. Обери спеціаліста, керуй загоном з 10 бійців та захопи центральну точку раніше за ворога.</p>
+        <div style="margin-top:34px;display:flex;flex-wrap:wrap;gap:14px;">
+        <!---<button class="btn btn-primary" onclick="DIFFICULTY=DIFFICULTIES.sergeant; goto_('connecting')">🟢 Онлайн →</button>-->  
+          <button class="btn btn-ghost" onclick="VIA_ONLINE=false; goto_('difficulty')">Офлайн (проти ботів)</button>
+          <button class="btn btn-ghost" onclick="goto_('details')">Деталі гри</button>
+          <button class="btn btn-ghost" onclick="goto_('replays')">🎞 Повтори</button>
+          <button class="btn btn-ghost" onclick="goto_('settings')">Налаштування</button>
+        </div>
+        <p class="muted" style="font-size:.68rem;margin-top:14px;max-width:480px;">Онлайн — це імітація підбору гравців: реальних суперників тут немає, бій завжди йде проти тактичних ботів, але з повним циклом лобі/пошуку/статистики.</p>
+      </section>
+      <section class="panel" style="padding:28px;position:relative;">
+        <div style="position:absolute;top:0;right:0;padding:8px 12px;font-size:9px;letter-spacing:.2em;color:var(--primary);border-left:1px solid var(--gold);border-bottom:1px solid var(--gold);">LIVE BRIEFING</div>
+        <div style="height:230px;border:1px solid var(--gold);position:relative;overflow:hidden;margin-bottom:22px;background:linear-gradient(135deg,#202a21,#131813);">
+          <div style="position:absolute;inset:0;opacity:.35;background:radial-gradient(ellipse at 30% 40%,#a38b4c,transparent 40%),radial-gradient(ellipse at 70% 65%,#78905b,transparent 45%);"></div>
+          <div style="position:absolute;left:20%;top:38%;width:10px;height:10px;background:var(--primary);border-radius:50%;box-shadow:0 0 25px 8px rgba(163,230,53,.35);"></div>
+          <div style="position:absolute;right:18%;bottom:26%;font-size:9px;letter-spacing:.2em;color:var(--primary);">SECTOR 04 // HOSTILE</div>
+          <div style="position:absolute;bottom:10px;left:10px;font-size:9px;letter-spacing:.2em;color:var(--muted);">TACTICAL FEED</div>
+        </div>
+        <div class="statrow" style="justify-content:space-between;">
+          <div class="hud-stat"><div style="font-size:1.3rem;font-weight:800;">10</div><div class="muted" style="font-size:.65rem;">БІЙЦІВ У КОМАНДІ</div></div>
+          <div class="hud-stat"><div style="font-size:1.3rem;font-weight:800;">35с</div><div class="muted" style="font-size:.65rem;">ОГЛЯД КАРТИ</div></div>
+          <div class="hud-stat"><div style="font-size:1.3rem;font-weight:800;">1:40</div><div class="muted" style="font-size:.65rem;">УТРИМАННЯ ТОЧКИ</div></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</section>
+
+<!-- =============== OFFLINE: DIFFICULTY SELECT =============== -->
+<section id="screen-difficulty" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button><button class="btn btn-ghost" onclick="goto_('menu')">← Меню</button></div></header>
+  <main class="wrap" style="padding:60px 22px;max-width:920px;">
+    <div class="step">ОФЛАЙН // ПРОТИ БОТІВ</div>
+    <h1 class="heading" style="font-size:2.6rem;margin:0 0 8px;">Оберіть складність</h1>
+    <p class="muted" style="margin-bottom:30px;">Впливає на здоров'я, точність, дальність виявлення та частоту вогню ворожих ботів.</p>
+    <div class="grid3" id="difficultyGrid"></div>
+  </main>
+</section>
+
+<!-- =============== ONLINE: CONNECTING =============== -->
+<section id="screen-connecting" class="screen grid-bg" style="min-height:var(--sh);">
+  <main class="wrap" style="padding:0 22px;height:var(--sh);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+    <div class="spinner" style="width:54px;height:54px;border-radius:50%;border:3px solid rgba(163,230,53,.2);border-top-color:var(--primary);animation:spin 1s linear infinite;"></div>
+    <h2 class="heading" style="margin-top:22px;font-size:1.3rem;">Підключення до сервера...</h2>
+    <p class="muted" style="font-size:.78rem;margin-top:6px;">Авторизація · синхронізація профілю</p>
+  </main>
+</section>
+
+<!-- =============== ONLINE: LOBBY =============== -->
+<section id="screen-lobby" class="screen grid-bg" style="min-height:var(--sh);">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;align-items:center;">
+    <button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button>
+    <button id="profileBtn" onclick="goto_('stats')" style="display:flex;align-items:center;gap:10px;background:none;border:1px solid var(--gold);border-radius:20px;padding:6px 14px 6px 6px;cursor:pointer;color:var(--text);font-family:inherit;">
+      <span style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#04140a;display:flex;align-items:center;justify-content:center;font-weight:900;">B</span>
+      <span style="font-size:.78rem;text-align:left;"><b>Боєць</b><br><span class="muted" id="lobbyWinrate" style="font-size:.65rem;">0% перемог</span></span>
+    </button>
+  </div></header>
+  <main class="wrap" style="padding:40px 22px;">
+    <div style="display:grid;grid-template-columns:1fr;gap:24px;" class="grid2">
+      <section>
+        <div class="step">ЛОБІ</div>
+        <h1 class="heading" style="font-size:2.2rem;margin:0 0 22px;">Найчастіше зіграний спеціаліст</h1>
+        <div class="panel" id="favClassCard" style="padding:26px;display:flex;gap:20px;align-items:center;"></div>
+
+        <div class="panel" style="padding:18px 22px;margin-top:20px;">
+          <div class="step" style="margin-bottom:10px;">РЕЖИМ БОЮ</div>
+          <div id="onlineModeToggle" style="display:flex;gap:10px;"></div>
+          <p class="muted" style="font-size:.68rem;margin-top:10px;">Карту й розмір карти матчмейкінг і далі підбирає випадково.</p>
+        </div>
+
+        <div style="text-align:center;margin-top:34px;">
+          <button class="btn btn-primary" style="font-size:1rem;padding:1.1rem 2.4rem;" onclick="goto_('searching')">⚔ Почати бій</button>
+        </div>
+      </section>
+      <aside class="panel" style="padding:22px;">
+        <div class="step">ДРУЗІ</div>
+        <div id="friendsList" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:260px;overflow-y:auto;"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <input id="friendNameInput" placeholder="Ім'я друга" style="flex:1;background:rgba(0,0,0,.3);border:1px solid var(--gold);border-radius:6px;padding:8px 10px;color:var(--text);font-family:inherit;font-size:.78rem;">
+          <button class="btn btn-ghost" style="padding:.6rem 1rem;" onclick="addFriend()">+</button>
+        </div>
+        <p class="muted" style="font-size:.6rem;margin-top:10px;">Локальний список у цьому браузері — реальних акаунтів немає.</p>
+      </aside>
+    </div>
+  </main>
+</section>
+
+<!-- =============== PROFILE STATS =============== -->
+<section id="screen-stats" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('lobby')">NEW ERA <span>OF WAR</span></button><button class="btn btn-ghost" onclick="goto_('lobby')">← Лобі</button></div></header>
+  <main class="wrap" style="padding:40px 22px 90px;">
+    <div class="step">ПРОФІЛЬ</div>
+    <h1 class="heading" style="font-size:2.4rem;margin:0 0 22px;">Статистика</h1>
+    <div class="grid3" style="margin-bottom:22px;">
+      <div class="panel" style="padding:20px;text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--primary);" id="statMatches">0</div><div class="muted" style="font-size:.7rem;">БОЇВ ЗІГРАНО</div></div>
+      <div class="panel" style="padding:20px;text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--primary);" id="statWinrate">0%</div><div class="muted" style="font-size:.7rem;">WIN RATE</div></div>
+      <div class="panel" style="padding:20px;text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--primary);" id="statMvp">0</div><div class="muted" style="font-size:.7rem;">MVP БОЇВ</div></div>
+    </div>
+    <div class="grid2">
+      <div class="panel" style="padding:22px;">
+        <div class="step">ЗАГАЛЬНІ ПОКАЗНИКИ</div>
+        <div id="statList" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.8rem;margin-top:10px;"></div>
+        <div class="step" style="margin-top:22px;">ЗА КЛАСАМИ</div>
+        <div id="statByClass" style="margin-top:10px;font-size:.76rem;"></div>
+      </div>
+      <div class="panel" style="padding:22px;display:flex;flex-direction:column;align-items:center;">
+        <div class="step" style="align-self:flex-start;">ПРОФІЛЬ БІЙЦЯ</div>
+        <canvas id="radarChart" width="320" height="300" style="margin-top:10px;max-width:100%;"></canvas>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- =============== SEARCHING FOR PLAYERS =============== -->
+<section id="screen-searching" class="screen grid-bg" style="min-height:var(--sh);">
+  <main class="wrap" style="padding:0 22px;height:var(--sh);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+    <div class="spinner" style="width:54px;height:54px;border-radius:50%;border:3px solid rgba(163,230,53,.2);border-top-color:var(--primary);animation:spin 1s linear infinite;"></div>
+    <h2 class="heading" style="margin-top:22px;font-size:1.3rem;">Пошук гравців...</h2>
+    <p class="muted" style="font-size:.78rem;margin:6px 0 20px;" id="searchCount">0 / 20 знайдено</p>
+    <div id="searchGrid" style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px;max-width:420px;"></div>
+  </main>
+</section>
+
+<!-- =============== MAP REVEAL =============== -->
+<section id="screen-mapreveal" class="screen grid-bg" style="min-height:var(--sh);">
+  <main class="wrap" style="padding:0 22px;height:var(--sh);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+    <div class="step">МАТЧ ЗНАЙДЕНО</div>
+    <div id="revealIcon" style="font-size:4rem;margin:10px 0;"></div>
+    <h1 class="heading" id="revealMapName" style="font-size:2.6rem;margin:0;">—</h1>
+    <p class="muted" id="revealSizeInfo" style="margin-top:8px;"></p>
+    <p class="muted" style="font-size:.7rem;margin-top:26px;">Карту й розмір гра обирає випадково</p>
+  </main>
+</section>
+
+<!-- =============== MAP SELECT =============== -->
+<section id="screen-map" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button><span class="muted" style="font-size:.68rem;letter-spacing:.2em;">ОПЕРАЦІЯ / НАЛАШТУВАННЯ БОЮ</span></div></header>
+  <main class="wrap" style="padding:50px 22px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:30px;flex-wrap:wrap;gap:12px;">
+      <div><div class="step">КРОК 01 / 04</div><h1 class="heading" style="font-size:2.6rem;margin:0;">Оберіть театр бойових дій</h1></div>
+      <button class="btn btn-ghost" onclick="goto_('menu')">← Меню</button>
+    </div>
+    <div class="grid2" id="mapGrid"></div>
+  </main>
+</section>
+
+<!-- =============== SIZE SELECT =============== -->
+<section id="screen-size" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button></div></header>
+  <main class="wrap" style="padding:60px 22px;max-width:920px;">
+    <div class="step">КРОК 02 / 04</div>
+    <h1 class="heading" style="font-size:2.8rem;margin:0 0 8px;">Масштаб операції</h1>
+    <p class="muted" style="margin-bottom:30px;">Розмір карти визначає тривалість бою.</p>
+    <div class="grid3" id="sizeGrid"></div>
+  </main>
+</section>
+
+<!-- =============== MODE SELECT (TEAM SIZE) =============== -->
+<section id="screen-mode" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button></div></header>
+  <main class="wrap" style="padding:60px 22px;max-width:920px;">
+    <div class="step">КРОК 03 / 04</div>
+    <h1 class="heading" style="font-size:2.8rem;margin:0 0 8px;">Розмір команди</h1>
+    <p class="muted" style="margin-bottom:30px;">Визначає склад загону та доступних спеціалістів.</p>
+    <div class="grid3" id="modeGrid"></div>
+  </main>
+</section>
+
+<!-- =============== CLASS SELECT =============== -->
+<section id="screen-class" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button></div></header>
+  <main class="wrap" style="padding:50px 22px 90px;">
+    <div class="step">КРОК 04 / 04</div>
+    <h1 class="heading" style="font-size:2.6rem;margin:0 0 20px;">Оберіть спеціаліста</h1>
+    <div id="classTimerBox"><span class="muted" id="classTimerLabel" style="font-size:.85rem;">⏱ Час на вибір:</span><span id="classTimerNum">30</span></div>
+    <div class="grid-cls" id="classGrid"></div>
+  </main>
+</section>
+
+<!-- =============== DETAILS =============== -->
+<section id="screen-details" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button><button class="btn btn-ghost" onclick="goto_('menu')">← Меню</button></div></header>
+  <main class="wrap" style="padding:50px 22px 90px;">
+    <div class="step">ПОЛЬОВИЙ ДОВІДНИК</div>
+    <h1 class="heading" style="font-size:2.8rem;margin:0 0 26px;">Деталі гри</h1>
+    <div id="detailsBody" style="display:grid;gap:16px;max-width:820px;"></div>
+  </main>
+</section>
+
+<!-- =============== SETTINGS =============== -->
+<section id="screen-settings" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button><button class="btn btn-ghost" onclick="goto_('menu')">← Меню</button></div></header>
+  <main class="wrap" style="padding:60px 22px;max-width:640px;">
+    <div class="step">СИСТЕМНІ ПАРАМЕТРИ</div>
+    <h1 class="heading" style="font-size:2.6rem;margin:0 0 26px;">Налаштування</h1>
+    <section class="panel" style="padding:0;">
+      <label style="padding:20px;display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid rgba(255,255,255,.08);align-items:center;">
+        <span><b>Звукові ефекти</b><small class="muted" style="display:block;margin-top:3px;">Постріли, вибухи, сигнали</small></span>
+        <input type="checkbox" id="optSfx" checked style="width:20px;height:20px;accent-color:var(--primary);">
+      </label>
+      <label style="padding:20px;display:flex;justify-content:space-between;gap:20px;align-items:center;">
+        <span><b>Тактичні підказки</b><small class="muted" style="display:block;margin-top:3px;">Показувати підказки керування під час бою</small></span>
+        <input type="checkbox" id="optHints" checked style="width:20px;height:20px;accent-color:var(--primary);">
+      </label>
+      <label style="padding:20px;display:flex;justify-content:space-between;gap:20px;border-top:1px solid rgba(255,255,255,.08);align-items:center;">
+        <span><b>Зберігати повтори боїв</b><small class="muted" style="display:block;margin-top:3px;">Після кожного завершеного бою запис зберігається в браузері (Меню → Повтори)</small></span>
+        <input type="checkbox" id="optSaveReplays" checked style="width:20px;height:20px;accent-color:var(--primary);">
+      </label>
+      <div style="padding:20px;border-top:1px solid rgba(255,255,255,.08);">
+        <div style="display:flex;justify-content:space-between;gap:20px;align-items:center;">
+          <span><b>Розширення екрана</b><small class="muted" style="display:block;margin-top:3px;">Для всієї програми: меню, лобі, налаштування й бій. Задає пропорції екрана та чіткість картинки бою (менше — пікселізованіше, більше — чіткіше, але важче для відеокарти). Інтерфейс і поле зору в бою масштабуються пропорційно.</small></span>
+          <select id="optRes" style="background:rgba(0,0,0,.35);border:1px solid var(--gold);color:var(--text);border-radius:6px;padding:8px 10px;font-family:inherit;font-size:.8rem;width:170px;flex:none;"></select>
+        </div>
+        <div class="muted" id="optResInfo" style="font-size:.68rem;margin-top:8px;"></div>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- =============== REPLAYS =============== -->
+<section id="screen-replays" class="screen scrollpane grid-bg">
+  <header class="top"><div class="wrap" style="display:flex;justify-content:space-between;"><button class="logo" onclick="goto_('menu')">NEW ERA <span>OF WAR</span></button><button class="btn btn-ghost" onclick="goto_('menu')">← Меню</button></div></header>
+  <main class="wrap" style="padding:50px 22px 90px;max-width:980px;">
+    <div class="step">АРХІВ БОЇВ</div>
+    <h1 class="heading" style="font-size:2.6rem;margin:0 0 10px;">Повтори</h1>
+    <p class="muted" id="rpInfo" style="font-size:.8rem;margin:0;"></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 8px;align-items:center;">
+      <label class="btn btn-ghost" for="rpImport" style="padding:.6rem 1rem;">📥 Імпортувати файл</label>
+      <input type="file" id="rpImport" accept=".nowr,application/octet-stream" hidden>
+      <button class="btn btn-ghost" id="rpClearAll" style="padding:.6rem 1rem;">🗑 Очистити все</button>
+    </div>
+    <div id="rpMsg" style="font-size:.8rem;min-height:1.3em;margin-bottom:12px;"></div>
+    <div id="rpList" style="display:grid;gap:12px;"></div>
+  </main>
+</section>
+
+<!-- =============== BATTLE =============== -->
+<section id="screen-battle" class="screen">
+  <div id="battleGrid">
+    <div id="gameCanvasWrap">
+      <canvas id="gameCanvas"></canvas>
+      <div id="topbar"><span id="opLabel">ОПЕРАЦІЯ: FRONTLINE</span><span id="matchClock">00:00</span></div>
+      <div id="radarNotice">📡 РОЗВІДКА: ПОЗИЦІЇ ВОРОГІВ ВИЯВЛЕНО</div>
+      <div id="toast"></div>
+      <button id="hudToggleBtn" onclick="toggleHud()" title="Приховати/показати панель" style="position:absolute;top:10px;left:10px;z-index:7;background:rgba(10,15,10,.75);border:1px solid var(--gold);color:var(--primary);border-radius:6px;width:34px;height:34px;font-size:1rem;cursor:pointer;">☰</button>
+      <div id="minimapWrap" style="position:absolute;top:10px;right:10px;z-index:6;width:128px;">
+        <canvas id="minimap" width="256" height="256"></canvas>
+      </div>
+      <div id="logfeed"></div>
+      <div id="rpBar">
+        <div id="rpTrack"><div id="rpMarks"></div><input type="range" id="rpSeek" min="0" max="1000" value="0" step="1" aria-label="Перемотка"></div>
+        <div id="rpRow">
+          <button class="rp-btn" id="rpPlay" title="Пауза / відтворення (Пробіл)">⏸</button>
+          <button class="rp-btn" id="rpBack" title="−10 с">⏪ 10с</button>
+          <button class="rp-btn" id="rpFwd" title="+10 с">10с ⏩</button>
+          <span id="rpTime">00:00 / 00:00</span>
+          <button class="rp-btn" id="rpFollow" title="Камера (F)">🎥 Вільна камера</button>
+          <span id="rpSpeeds">
+            <button class="rp-btn" data-s="0.5">0.5×</button><button class="rp-btn on" data-s="1">1×</button><button class="rp-btn" data-s="2">2×</button><button class="rp-btn" data-s="4">4×</button><button class="rp-btn" data-s="8">8×</button>
+          </span>
+          <button class="rp-btn" id="rpExit" title="Esc">✕ Вийти</button>
+        </div>
+      </div>
+    </div>
+    <aside id="hud">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+        <div class="step" style="margin-bottom:0;">СТАН БІЙЦЯ</div>
+        <button id="hudExtrasToggleBtn" onclick="toggleHudExtras()" title="Приховати/показати вміння, зброю і характеристики" style="background:rgba(0,0,0,.3);border:1px solid var(--gold);color:var(--primary);border-radius:5px;padding:3px 8px;font-size:.62rem;cursor:pointer;font-family:inherit;">Приховати ▲</button>
+      </div>
+      <h2 class="heading" id="hudClassName" style="font-size:1.4rem;margin:2px 0 10px;">—</h2>
+      <div class="hpbar"><i id="hpFill" style="width:100%;"></i></div>
+      <div style="display:flex;justify-content:space-between;font-size:.68rem;margin-top:5px;"><span>ЗДОРОВ'Я</span><span id="hpText">0/0</span></div>
+
+      <div id="hudExtras">
+      <div class="hud-grid" style="margin-top:16px;">
+        <div class="hud-stat"><b id="statSpeed">0</b><br><span class="muted">ШВИДКІСТЬ</span></div>
+        <div class="hud-stat"><b id="statStealth">0</b><br><span class="muted">МАСКУВАННЯ</span></div>
+        <div class="hud-stat"><b id="statArmor">0</b><br><span class="muted">БРОНЯ</span></div>
+        <div class="hud-stat"><b id="statAmmo">0/0</b><br><span class="muted">БОЄЗАПАС</span></div>
+      </div>
+
+      <div class="progresswrap">
+        <div class="lbl"><span>ЗБРОЯ (колесо миші / 1-4)</span><span id="weaponName">—</span></div>
+        <div id="weaponWheel" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;"></div>
+      </div>
+
+      <div id="cooldownsBox"></div>
+      </div>
+
+      <div class="progresswrap">
+        <div class="lbl"><span style="color:var(--ally);">СОЮЗНІ ВІЙСЬКА</span><span id="allyCount">10/10</span></div>
+        <div class="pbar"><i id="allyBar" style="background:var(--ally);width:100%;"></i></div>
+      </div>
+      <div class="progresswrap">
+        <div class="lbl"><span style="color:var(--enemy);">ВОРОЖІ ВІЙСЬКА</span><span id="enemyCount">10/10</span></div>
+        <div class="pbar"><i id="enemyBar" style="background:var(--enemy);width:100%;"></i></div>
+      </div>
+      <div class="progresswrap">
+        <div class="lbl"><span>ЦЕНТРАЛЬНА ТОЧКА</span><span id="captureLabel">—</span></div>
+        <div class="pbar"><i id="captureBar" style="background:var(--primary);width:0%;"></i></div>
+      </div>
+
+      <div class="keyhint">
+        WASD — рух · МИША — приціл · ЛКМ/Пробіл — вогонь · R — перезарядка<br>
+        Колесо миші / 1-4 — зброя · E — здібність · Q — спорядження · Esc — вихід<br>
+        <span style="color:var(--primary);">Снайпер: Пробіл — приціл (нерухомо, огляд лише смуга 100-300px/10px завширшки, хід ±90°)</span><br>
+        <span style="color:var(--primary);">Мінометник: клік по мінікарті — вогонь через стіни; з міномета в руках не рухається</span>
+      </div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:14px;" onclick="endMission()">Завершити місію</button>
+    </aside>
+    <aside id="replayPanel" style="display:none;">
+      <div class="step" style="margin-bottom:4px;">ПОВТОР БОЮ</div>
+      <h2 class="heading" id="rpTitle" style="font-size:1.2rem;margin:2px 0 8px;">—</h2>
+      <div class="muted" id="rpSub" style="font-size:.66rem;line-height:1.6;"></div>
+      <div class="progresswrap" style="margin-top:14px;">
+        <div class="lbl"><span style="color:var(--ally);">СОЮЗНІ ВІЙСЬКА</span><span id="rpAllyCnt">—</span></div>
+        <div class="pbar"><i id="rpAllyBar" style="background:var(--ally);width:100%;"></i></div>
+      </div>
+      <div class="progresswrap">
+        <div class="lbl"><span style="color:var(--enemy);">ВОРОЖІ ВІЙСЬКА</span><span id="rpEnemyCnt">—</span></div>
+        <div class="pbar"><i id="rpEnemyBar" style="background:var(--enemy);width:100%;"></i></div>
+      </div>
+      <div class="progresswrap">
+        <div class="lbl"><span>ЦЕНТРАЛЬНА ТОЧКА</span><span id="rpCapLabel">—</span></div>
+        <div class="pbar"><i id="rpCapBar" style="background:var(--primary);width:0%;"></i></div>
+      </div>
+      <div class="step" style="margin:18px 0 4px;">БІЙЦІ <span class="muted" style="letter-spacing:0;text-transform:none;font-size:.6rem;">· клік — стежити</span></div>
+      <div id="rpRoster"></div>
+      <div class="step" style="margin:18px 0 6px;">ПОДІЇ <span class="muted" style="letter-spacing:0;text-transform:none;font-size:.6rem;">· клік — перемотати</span></div>
+      <div id="rpEvents"></div>
+      <div class="keyhint">
+        Пробіл — пауза · ← → — ±5с (Shift — ±30с) · ↑ ↓ — швидкість<br>
+        Tab — наступний боєць · F — вільна камера · Колесо — масштаб<br>
+        Тягніть мишею — рухати камеру · клік по мінікарті — перейти туди · Esc — вихід
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- =============== END SCREEN =============== -->
+<section id="screen-end" class="screen scrollpane grid-bg">
+  <main class="wrap" style="padding:30px 22px 50px;text-align:center;max-width:1280px;" id="endScreen">
+    <div class="step" style="justify-content:center;display:flex;">РЕЗУЛЬТАТ ОПЕРАЦІЇ</div>
+    <div class="sb-top"><span class="sb-score" id="sbA" style="color:#6ec6ff;">0</span><h1 class="heading" id="endTitle">—</h1><span class="sb-score" id="sbE" style="color:#ff7a8a;">0</span></div>
+    <p class="muted" id="endSub" style="font-size:.95rem;margin:2px 0;"></p>
+    <p class="muted" id="sbMeta" style="font-size:.72rem;margin:0;"></p>
+    <div class="sb-tabs"><button class="sb-tab active" data-tab="dmg" onclick="sbTab('dmg')">Шкода</button><button class="sb-tab" data-tab="kda" onclick="sbTab('kda')">Бій</button></div>
+    <div id="scoreboard"></div>
+    <div id="endStats" style="display:none;"></div>
+    <div id="replayStatus" class="muted" style="margin-top:20px;font-size:.78rem;min-height:1.3em;"></div>
+    <div style="margin-top:14px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="endPrimaryBtn" onclick="goto_('map')">Нова операція</button>
+      <button class="btn btn-ghost" id="endReplayBtn" style="display:none;">🎞 Переглянути повтор</button>
+      <button class="btn btn-ghost" id="endReplayDl" style="display:none;">⬇ Завантажити повтор</button>
+      <button class="btn btn-ghost" onclick="goto_('menu')">Головне меню</button>
+    </div>
+  </main>
+</section>
+</div>
+
+<!-- ===== Загальне ===== -->
+<script src="common/constants.js"></script>
+<script src="common/utils.js"></script>
+<script src="common/sound.js"></script>
+<!-- ===== Персонажі, зброя, предмети, вміння ===== -->
+<script src="characters/classes.js"></script>
+<script src="characters/wepons.js"></script>
+<script src="characters/items.js"></script>
+<script src="characters/abilities.js"></script>
+<!-- ===== Карти ===== -->
+<script src="combat/map.js"></script>
+<!-- ===== Логіка гри ===== -->
+<script src="game_logic.js"></script>
+<!-- ===== Онлайн ===== -->
+<script src="online/online_mode.js"></script>
+<script src="online/friends.js"></script>
+<script src="online/lobby.js"></script>
+<script src="online/matchmaking.js"></script>
+<!-- ===== Повтори (стан) ===== -->
+<script src="replays/replay_state.js"></script>
+<!-- ===== Персонажі: боєць і спрайти ===== -->
+<script src="characters/entity.js"></script>
+<script src="characters/sprites/pixel_sprites.js"></script>
+<!-- ===== Бій: до, під час і після (after_battle.js підключати ПІСЛЯ game_loop.js і demg.js) ===== -->
+<script src="combat/before_battle.js"></script>
+<script src="combat/demg.js"></script>
+<script src="combat/update.js"></script>
+<script src="combat/during_battle/battle_state.js"></script>
+<script src="combat/during_battle/input.js"></script>
+<script src="combat/during_battle/game_loop.js"></script>
+<script src="combat/during_battle/visibility.js"></script>
+<script src="combat/during_battle/bot_ai.js"></script>
+<script src="combat/during_battle/capture_point.js"></script>
+<script src="combat/after_battle.js"></script>
+<!-- ===== Інтерфейс ===== -->
+<script src="interface/navigation.js"></script>
+<script src="interface/screens/select.js"></script>
+<script src="interface/screens/details_screen.js"></script>
+<script src="interface/screens/profile_stats.js"></script>
+<script src="interface/battle/canvas.js"></script>
+<script src="interface/battle/hud.js"></script>
+<script src="interface/battle/messages.js"></script>
+<script src="interface/battle/radar_pulse.js"></script>
+<script src="interface/battle/render.js"></script>
+<script src="interface/battle/scope_overlay.js"></script>
+<script src="interface/battle/draw_entities.js"></script>
+<script src="interface/battle/minimap.js"></script>
+<!-- ===== Запуск (перший старт екранів) ===== -->
+<script src="common/boot.js"></script>
+<!-- ===== Доповнення (патчать основні функції — порядок важливий!) ===== -->
+<script src="characters/sprites/sprite_data.js"></script>
+<script src="characters/sprites/sprite_animation.js"></script>
+<script src="interface/resolution.js"></script>
+<!-- ===== Повтори ===== -->
+<script src="replays/replay_common.js"></script>
+<script src="replays/recording/recorder.js"></script>
+<script src="replays/replays_library.js"></script>
+<script src="replays/recording/save_after_battle.js"></script>
+<script src="replays/replays_viewing.js"></script>
+</body>
+</html>
